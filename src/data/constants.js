@@ -21,9 +21,9 @@ export const RELATIONSHIP = {
 export const STEPS = [
   { id: 1, label: 'Who is this for?' },
   { id: 2, label: 'Spouse & Children' },
-  { id: 3, label: 'Add Parents' },
-  { id: 4, label: 'Add Aunts & Uncles' },
-  { id: 5, label: 'Add Grandparents' },
+  { id: 3, label: 'Parents' },
+  { id: 4, label: 'Aunts & Uncles' },
+  { id: 5, label: 'Grandparents' },
   { id: 6, label: 'Your XLH Family Tree' },
 ];
 

@@ -16,16 +16,24 @@ Key genetic rules:
 
 This tool allows users to:
 
-1. Build a family tree through a guided 6-step wizard
+1. Build a family tree through a **guided 6-step wizard** or a **visual tree builder**
 2. Automatically analyze X-linked inheritance patterns
 3. Identify probable carriers and the likely origin of XLH in the family
 4. Visualize the results as an interactive, color-coded pedigree chart
+
+## Two Modes
+
+- **Wizard Mode** (`index.html`) — Step-by-step form flow: proband, children, parents, aunts/uncles, grandparents, then final tree view with analysis
+- **Tree Builder** (`tree-builder.html`) — Visual direct manipulation: hover over nodes to see `+` buttons for adding parents, spouses, children, and siblings; right-click for a context menu with all actions
+
+Both modes share the same data store and render the same tree. Switching between them preserves your family tree.
 
 ## Architecture
 
 ```
 src/
-├── main.js                          # App bootstrap
+├── main.js                          # Wizard mode bootstrap
+├── tree-builder-main.js             # Tree builder mode bootstrap
 ├── style.css                        # Global styles + CSS custom properties
 │
 ├── data/
@@ -37,7 +45,7 @@ src/
 │   └── TreeAnalyzer.js              # Origin tracing + report generation
 │
 ├── components/
-│   ├── App.js                       # Root component
+│   ├── App.js                       # Wizard mode root component
 │   ├── ProgressBar.js               # Step indicator (dots + lines)
 │   ├── wizard/
 │   │   ├── WizardContainer.js       # Step navigation + validation
@@ -47,6 +55,9 @@ src/
 │   │   ├── StepAuntsUncles.js       # Step 4: Siblings of parents
 │   │   ├── StepGrandparents.js      # Step 5: Grandparents
 │   │   └── StepTreeView.js          # Step 6: Final tree + analysis
+│   ├── tree-builder/
+│   │   ├── TreeBuilderApp.js        # Tree builder root (visual editing)
+│   │   └── TreeActionButtons.js     # Hover + buttons on nodes
 │   ├── shared/
 │   │   ├── PersonForm.js            # Reusable form (name, sex, XLH status)
 │   │   ├── PersonCard.js            # Compact person display
@@ -67,9 +78,9 @@ src/
 ### Data Flow
 
 ```
-User Input (Wizard) --> FamilyStore --> InheritanceEngine --> TreeRenderer
-                            |                                     |
-                       localStorage                          SVG Output
+User Input (Wizard / Tree Builder) --> FamilyStore --> InheritanceEngine --> TreeRenderer
+                                           |                                     |
+                                      localStorage                          SVG Output
 ```
 
 The **FamilyStore** is a singleton that holds all person nodes with a pub/sub pattern. Any mutation triggers a save to localStorage and notifies subscribers. The store manages relationships (parent-child, spouse, sibling) as linked IDs.

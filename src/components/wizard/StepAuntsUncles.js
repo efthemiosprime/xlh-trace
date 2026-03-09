@@ -7,18 +7,30 @@ import { RELATIONSHIP, GENERATION, SEX } from '../../data/constants.js';
 
 export function StepAuntsUncles() {
   const proband = familyStore.getProband();
-  const parents = familyStore.getParents(proband.id);
+  const spouse = proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
   const container = h('div');
+  let activeTab = 'proband';
+
+  function getTarget() {
+    return activeTab === 'spouse' ? spouse : proband;
+  }
 
   function render() {
     container.innerHTML = '';
+    const target = getTarget();
+    const parents = familyStore.getParents(target.id);
+
     container.append(
       h('h2', {}, 'Add Aunts & Uncles'),
-      h('p', { className: 'step-description' }, 'Add siblings of each parent. Skip if none.'),
+      h('p', { className: 'step-description' }, `Add siblings of ${target.name}'s parents. Skip if none.`),
     );
 
+    if (spouse) {
+      container.appendChild(renderTabs());
+    }
+
     if (parents.length === 0) {
-      container.appendChild(h('p', { style: 'color: var(--color-text-muted)' }, 'Add parents first (go back to step 3).'));
+      container.appendChild(h('p', { style: 'color: var(--color-text-muted)' }, `Add ${target.name}'s parents first (go back to the Parents step).`));
       return;
     }
 
@@ -42,6 +54,20 @@ export function StepAuntsUncles() {
 
       container.appendChild(list);
     }
+  }
+
+  function renderTabs() {
+    const probandTab = h('button', {
+      className: `side-tab${activeTab === 'proband' ? ' active' : ''}`,
+      onClick: () => { activeTab = 'proband'; render(); },
+    }, `${proband.name}'s Side`);
+
+    const spouseTab = h('button', {
+      className: `side-tab${activeTab === 'spouse' ? ' active' : ''}`,
+      onClick: () => { activeTab = 'spouse'; render(); },
+    }, `${spouse.name}'s Side`);
+
+    return h('div', { className: 'side-tabs' }, [probandTab, spouseTab]);
   }
 
   function openAddModal(parent, list, getSiblings) {

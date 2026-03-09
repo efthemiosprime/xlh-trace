@@ -142,11 +142,22 @@ class FamilyStore {
     return [...this.#people.values()];
   }
 
-  setParentChild(parentId, childId) {
+  setParentChild(parentId, childId, { before } = {}) {
     const parent = this.#people.get(parentId);
     const child = this.#people.get(childId);
     if (!parent || !child) return;
-    if (!parent.childIds.includes(childId)) parent.childIds.push(childId);
+    if (!parent.childIds.includes(childId)) {
+      if (before) {
+        const idx = parent.childIds.indexOf(before);
+        if (idx >= 0) {
+          parent.childIds.splice(idx, 0, childId);
+        } else {
+          parent.childIds.push(childId);
+        }
+      } else {
+        parent.childIds.push(childId);
+      }
+    }
     if (!child.parentIds.includes(parentId)) child.parentIds.push(parentId);
     this.#notify('relationship', { parentId, childId });
   }

@@ -7,10 +7,16 @@ import { RELATIONSHIP, GENERATION, SEX, XLH_STATUS } from '../../data/constants.
 
 export function StepParents() {
   const proband = familyStore.getProband();
+  const spouse = proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
   const container = h('div');
+  let activeTab = 'proband';
+
+  function getTarget() {
+    return activeTab === 'spouse' ? spouse : proband;
+  }
 
   function getParents() {
-    return familyStore.getParents(proband.id);
+    return familyStore.getParents(getTarget().id);
   }
 
   function getMother() {
@@ -23,13 +29,19 @@ export function StepParents() {
 
   function render() {
     container.innerHTML = '';
+    const target = getTarget();
     const mother = getMother();
     const father = getFather();
 
     container.append(
       h('h2', {}, 'Add Parents'),
-      h('p', { className: 'step-description' }, `Add ${proband.name}'s mother and/or father.`),
+      h('p', { className: 'step-description' }, `Add ${target.name}'s mother and/or father.`),
     );
+
+    // Tabs (only if spouse exists)
+    if (spouse) {
+      container.appendChild(renderTabs());
+    }
 
     // Mother section
     container.appendChild(h('h3', { style: 'margin: 1rem 0 0.5rem' }, 'Mother'));
@@ -58,7 +70,22 @@ export function StepParents() {
     }
   }
 
+  function renderTabs() {
+    const probandTab = h('button', {
+      className: `side-tab${activeTab === 'proband' ? ' active' : ''}`,
+      onClick: () => { activeTab = 'proband'; render(); },
+    }, `${proband.name}'s Side`);
+
+    const spouseTab = h('button', {
+      className: `side-tab${activeTab === 'spouse' ? ' active' : ''}`,
+      onClick: () => { activeTab = 'spouse'; render(); },
+    }, `${spouse.name}'s Side`);
+
+    return h('div', { className: 'side-tabs' }, [probandTab, spouseTab]);
+  }
+
   function openAddModal(sex, label) {
+    const target = getTarget();
     const form = PersonForm({ sex, sexLocked: true, xlhStatus: XLH_STATUS.UNKNOWN });
     Modal({
       title: `Add ${label}`,
@@ -70,7 +97,7 @@ export function StepParents() {
           relationship: RELATIONSHIP.PARENT,
           generation: GENERATION.PARENT,
         });
-        familyStore.setParentChild(parent.id, proband.id);
+        familyStore.setParentChild(parent.id, target.id);
 
         // Set parents as spouses of each other
         const otherParent = sex === SEX.FEMALE ? getFather() : getMother();

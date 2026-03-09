@@ -12,6 +12,10 @@ export function createElement(tag, attrs = {}, children = []) {
       el.addEventListener(key.slice(2).toLowerCase(), value);
     } else if (key === 'htmlFor') {
       el.setAttribute('for', value);
+    } else if (key === 'checked' || key === 'disabled' || key === 'selected') {
+      el[key] = value !== false && value !== undefined;
+    } else if (key === 'value') {
+      el.value = value;
     } else {
       el.setAttribute(key, value);
     }
