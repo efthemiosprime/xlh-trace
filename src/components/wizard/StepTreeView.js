@@ -6,6 +6,8 @@ import { TreeRenderer } from '../tree/TreeRenderer.js';
 import { TreeLegend } from '../tree/TreeLegend.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { Modal } from '../shared/Modal.js';
+import { exportTreePDF } from '../../utils/pdfExport.js';
+import { relationshipLabel } from '../../data/constants.js';
 
 export function StepTreeView({ onPrev }) {
   const container = h('div');
@@ -33,6 +35,14 @@ export function StepTreeView({ onPrev }) {
     const svg = renderer.render();
     treeContainer.appendChild(svg);
     container.appendChild(treeContainer);
+
+    // Export PDF button
+    container.appendChild(h('div', { style: 'text-align: center; margin-top: 0.75rem;' }, [
+      h('button', {
+        className: 'btn btn-secondary btn-sm no-print',
+        onClick: () => exportTreePDF(svg),
+      }, 'Export PDF'),
+    ]));
 
     // Legend
     container.appendChild(TreeLegend());
@@ -94,7 +104,7 @@ export function StepTreeView({ onPrev }) {
       sexLocked: true,
     });
     Modal({
-      title: `Edit ${person.name}`,
+      title: `Edit ${person.name} (${relationshipLabel(person)})`,
       content: form,
       onSave: () => {
         if (!form.isValid()) return false;

@@ -691,3 +691,20 @@ h3 { font-size: 1.1rem; }
   .progress-line { width: 24px; }
   .radio-group { flex-direction: column; }
 }
+
+/* === Print === */
+@media print {
+  body { background: white; }
+  .app-header__actions,
+  .progress-bar,
+  .wizard-nav,
+  .analysis-panel,
+  .no-print,
+  .action-group,
+  .context-menu { display: none !important; }
+  #app, .tree-builder { max-width: none; padding: 0; }
+  .wizard-container { box-shadow: none; padding: 0.5rem; }
+  .tree-container { overflow: visible; }
+  .tree-svg { max-width: 100%; height: auto; }
+  @page { size: landscape; margin: 10mm; }
+}

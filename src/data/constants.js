@@ -33,3 +33,16 @@ export const GENERATION = {
   PROBAND: 0,
   CHILD: 1,
 };
+
+const RELATIONSHIP_LABELS = {
+  [RELATIONSHIP.PROBAND]: 'Proband',
+  [RELATIONSHIP.PARENT]: 'Parent',
+  [RELATIONSHIP.GRANDPARENT]: 'Grandparent',
+  [RELATIONSHIP.CHILD]: 'Child',
+  [RELATIONSHIP.SPOUSE]: 'Spouse',
+  [RELATIONSHIP.AUNT_UNCLE]: 'Aunt/Uncle',
+};
+
+export function relationshipLabel(person) {
+  return RELATIONSHIP_LABELS[person.relationship] || 'Family Member';
+}

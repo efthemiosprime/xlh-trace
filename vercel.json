@@ -1,0 +1,9 @@
+{
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/tree-builder", "dest": "/tree-builder.html" }
+  ]
+}

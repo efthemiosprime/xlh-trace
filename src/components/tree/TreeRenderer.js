@@ -38,25 +38,41 @@ export function TreeRenderer({ onNodeClick }) {
     const mother = parents.find(p => p.sex === SEX.FEMALE);
     const father = parents.find(p => p.sex === SEX.MALE);
 
-    const maternalSiblings = mother ? familyStore.getSiblings(mother.id) : [];
+    // Filter out cross-contamination: mother's siblings shouldn't include father
+    const maternalSiblings = mother
+      ? familyStore.getSiblings(mother.id).filter(s => s.id !== father?.id)
+      : [];
     const maternalGPs = mother ? familyStore.getParents(mother.id) : [];
-    const paternalSiblings = father ? familyStore.getSiblings(father.id) : [];
+    const paternalSiblings = father
+      ? familyStore.getSiblings(father.id).filter(s => s.id !== mother?.id)
+      : [];
     const paternalGPs = father ? familyStore.getParents(father.id) : [];
+
+    // Collect siblings of grandparents (great-aunts/uncles at GP level)
+    const maternalGPSibs = collectGPSiblings(maternalGPs);
+    const paternalGPSibs = collectGPSiblings(paternalGPs);
 
     const probandSpouse = proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
 
     let spouseParentsArr = [], spouseMother = null, spouseFather = null;
     let spouseMatSiblings = [], spousePatSiblings = [];
     let spouseMatGPs = [], spousePatGPs = [];
+    let spouseMatGPSibs = [], spousePatGPSibs = [];
 
     if (probandSpouse) {
       spouseParentsArr = familyStore.getParents(probandSpouse.id);
       spouseMother = spouseParentsArr.find(p => p.sex === SEX.FEMALE);
       spouseFather = spouseParentsArr.find(p => p.sex === SEX.MALE);
-      spouseMatSiblings = spouseMother ? familyStore.getSiblings(spouseMother.id) : [];
+      spouseMatSiblings = spouseMother
+        ? familyStore.getSiblings(spouseMother.id).filter(s => s.id !== spouseFather?.id)
+        : [];
       spouseMatGPs = spouseMother ? familyStore.getParents(spouseMother.id) : [];
-      spousePatSiblings = spouseFather ? familyStore.getSiblings(spouseFather.id) : [];
+      spousePatSiblings = spouseFather
+        ? familyStore.getSiblings(spouseFather.id).filter(s => s.id !== spouseMother?.id)
+        : [];
       spousePatGPs = spouseFather ? familyStore.getParents(spouseFather.id) : [];
+      spouseMatGPSibs = collectGPSiblings(spouseMatGPs);
+      spousePatGPSibs = collectGPSiblings(spousePatGPs);
     }
 
     // === COMPUTE PARENT COUPLE GAPS (may widen for grandparent overlap) ===
@@ -84,19 +100,33 @@ export function TreeRenderer({ onNodeClick }) {
     const patSibWidth = paternalSiblings.length * NODE_SLOT;
     const spouseMatSibWidth = spouseMatSiblings.length * NODE_SLOT;
 
+    // Account for GP siblings extending outward from GP couples
+    const matGPSibExtent = maternalGPs.length > 0
+      ? COUPLE_GAP / 2 + maternalGPSibs.length * NODE_SLOT : 0;
+    const patGPSibExtent = paternalGPs.length > 0
+      ? COUPLE_GAP / 2 + paternalGPSibs.length * NODE_SLOT : 0;
+    const spouseMatGPSibExtent = spouseMatGPs.length > 0
+      ? COUPLE_GAP / 2 + spouseMatGPSibs.length * NODE_SLOT : 0;
+    const spousePatGPSibExtent = spousePatGPs.length > 0
+      ? COUPLE_GAP / 2 + spousePatGPSibs.length * NODE_SLOT : 0;
+
     let probandSpouseGap = COUPLE_GAP;
     if (probandSpouse) {
-      // Right extent from proband's x: father side + paternal siblings
-      const probandParentRight = parents.length > 0 ? halfCouple + patSibWidth : 0;
-      // Left extent from spouse's x: mother side + maternal siblings
-      const spouseParentLeft = spouseParentsArr.length > 0 ? spouseHalfCouple + spouseMatSibWidth : 0;
+      // Right extent from proband's x: father side + paternal siblings or GP siblings
+      const probandParentRight = parents.length > 0
+        ? halfCouple + Math.max(patSibWidth, patGPSibExtent) : 0;
+      // Left extent from spouse's x: mother side + maternal siblings or GP siblings
+      const spouseParentLeft = spouseParentsArr.length > 0
+        ? spouseHalfCouple + Math.max(spouseMatSibWidth, spouseMatGPSibExtent) : 0;
       if (probandParentRight + spouseParentLeft > 0) {
         probandSpouseGap = Math.max(COUPLE_GAP, probandParentRight + NODE_SLOT + spouseParentLeft);
       }
     }
 
-    // === PLACE PROBAND + SPOUSE (bottom-up: children first, then parents above) ===
-    const probandX = PADDING + (parents.length > 0 ? matSibWidth + halfCouple : 0);
+    // === PLACE PROBAND + SPOUSE ===
+    // Left extent: maternal siblings or maternal GP siblings (whichever reaches further left)
+    const leftExtent = Math.max(matSibWidth, matGPSibExtent);
+    const probandX = PADDING + (parents.length > 0 ? leftExtent + halfCouple : 0);
     const probandY = genYMap[proband.generation];
 
     if (probandSpouse) {
@@ -111,7 +141,7 @@ export function TreeRenderer({ onNodeClick }) {
 
     let cursor = probandX - halfCouple - matSibWidth;
     for (const sib of maternalSiblings) {
-      place(sib, cursor, genYMap[sib.generation]);
+      place(sib, cursor, parentY);
       cursor += NODE_SLOT;
     }
 
@@ -120,16 +150,38 @@ export function TreeRenderer({ onNodeClick }) {
 
     cursor = probandX + halfCouple + NODE_SLOT;
     for (const sib of paternalSiblings) {
-      place(sib, cursor, genYMap[sib.generation]);
+      place(sib, cursor, parentY);
       cursor += NODE_SLOT;
     }
 
     // === PROBAND'S GRANDPARENTS centered above their children group ===
+    const gpY = maternalGPs.length > 0
+      ? genYMap[maternalGPs[0].generation]
+      : (paternalGPs.length > 0 ? genYMap[paternalGPs[0].generation] : PADDING);
+
     if (maternalGPs.length > 0) {
-      placeCouple(maternalGPs, getGroupCenter([mother, ...maternalSiblings]), genYMap[maternalGPs[0].generation]);
+      placeCouple(maternalGPs, getGroupCenter([mother, ...maternalSiblings]), gpY);
     }
     if (paternalGPs.length > 0) {
-      placeCouple(paternalGPs, getGroupCenter([father, ...paternalSiblings]), genYMap[paternalGPs[0].generation]);
+      placeCouple(paternalGPs, getGroupCenter([father, ...paternalSiblings]), gpY);
+    }
+
+    // === PROBAND'S GP SIBLINGS — maternal to LEFT, paternal to RIGHT ===
+    if (maternalGPSibs.length > 0 && maternalGPs.length > 0) {
+      const matGPCenter = getGroupCenter([mother, ...maternalSiblings]);
+      let gpSibX = matGPCenter - COUPLE_GAP / 2 - NODE_SLOT;
+      for (const sib of maternalGPSibs) {
+        place(sib, gpSibX, gpY);
+        gpSibX -= NODE_SLOT;
+      }
+    }
+    if (paternalGPSibs.length > 0 && paternalGPs.length > 0) {
+      const patGPCenter = getGroupCenter([father, ...paternalSiblings]);
+      let gpSibX = patGPCenter + COUPLE_GAP / 2 + NODE_SLOT;
+      for (const sib of paternalGPSibs) {
+        place(sib, gpSibX, gpY);
+        gpSibX += NODE_SLOT;
+      }
     }
 
     // === SPOUSE'S PARENTS centered above spouse ===
@@ -139,7 +191,7 @@ export function TreeRenderer({ onNodeClick }) {
 
       let spouseCursor = spouseX - spouseHalfCouple - spouseMatSibWidth;
       for (const sib of spouseMatSiblings) {
-        place(sib, spouseCursor, genYMap[sib.generation]);
+        place(sib, spouseCursor, spouseParentY);
         spouseCursor += NODE_SLOT;
       }
 
@@ -148,16 +200,38 @@ export function TreeRenderer({ onNodeClick }) {
 
       spouseCursor = spouseX + spouseHalfCouple + NODE_SLOT;
       for (const sib of spousePatSiblings) {
-        place(sib, spouseCursor, genYMap[sib.generation]);
+        place(sib, spouseCursor, spouseParentY);
         spouseCursor += NODE_SLOT;
       }
 
       // Spouse's grandparents
+      const spouseGPY = spouseMatGPs.length > 0
+        ? genYMap[spouseMatGPs[0].generation]
+        : (spousePatGPs.length > 0 ? genYMap[spousePatGPs[0].generation] : PADDING);
+
       if (spouseMatGPs.length > 0) {
-        placeCouple(spouseMatGPs, getGroupCenter([spouseMother, ...spouseMatSiblings]), genYMap[spouseMatGPs[0].generation]);
+        placeCouple(spouseMatGPs, getGroupCenter([spouseMother, ...spouseMatSiblings]), spouseGPY);
       }
       if (spousePatGPs.length > 0) {
-        placeCouple(spousePatGPs, getGroupCenter([spouseFather, ...spousePatSiblings]), genYMap[spousePatGPs[0].generation]);
+        placeCouple(spousePatGPs, getGroupCenter([spouseFather, ...spousePatSiblings]), spouseGPY);
+      }
+
+      // Spouse's GP siblings — maternal to LEFT, paternal to RIGHT
+      if (spouseMatGPSibs.length > 0 && spouseMatGPs.length > 0) {
+        const sMatGPCenter = getGroupCenter([spouseMother, ...spouseMatSiblings]);
+        let gpSibX = sMatGPCenter - COUPLE_GAP / 2 - NODE_SLOT;
+        for (const sib of spouseMatGPSibs) {
+          place(sib, gpSibX, spouseGPY);
+          gpSibX -= NODE_SLOT;
+        }
+      }
+      if (spousePatGPSibs.length > 0 && spousePatGPs.length > 0) {
+        const sPatGPCenter = getGroupCenter([spouseFather, ...spousePatSiblings]);
+        let gpSibX = sPatGPCenter + COUPLE_GAP / 2 + NODE_SLOT;
+        for (const sib of spousePatGPSibs) {
+          place(sib, gpSibX, spouseGPY);
+          gpSibX += NODE_SLOT;
+        }
       }
 
       cursor = spouseCursor;
@@ -180,12 +254,11 @@ export function TreeRenderer({ onNodeClick }) {
       if (!person.spouseId) continue;
       const spousePos = positions.get(person.spouseId);
       if (!spousePos) continue;
-      // Place spouse to the right of their partner
       place(person, spousePos.x + COUPLE_GAP, spousePos.y);
     }
 
-    // === GENERIC: place any remaining unplaced people under their parents ===
-    // Collect parent groups to re-center all children evenly
+    // === GENERIC: place any remaining unplaced people near their parents ===
+    // SAFE version: never deletes already-placed positions
     const handledParentGroups = new Set();
     for (const person of familyStore.getAll()) {
       if (positions.has(person.id)) continue;
@@ -194,7 +267,6 @@ export function TreeRenderer({ onNodeClick }) {
       const placedParent = personParents.find(p => positions.has(p.id));
 
       if (placedParent) {
-        // Build a unique key for the parent couple
         const coupleKey = placedParent.spouseId
           ? [placedParent.id, placedParent.spouseId].sort().join('-')
           : placedParent.id;
@@ -202,17 +274,27 @@ export function TreeRenderer({ onNodeClick }) {
         handledParentGroups.add(coupleKey);
 
         const parentPos = positions.get(placedParent.id);
-        const spousePos = placedParent.spouseId ? positions.get(placedParent.spouseId) : null;
-        const midX = spousePos ? (parentPos.x + spousePos.x) / 2 : parentPos.x;
         const childY = genYMap[person.generation] ?? (parentPos.y + V_GAP);
 
-        // Get ALL children of this couple, including already-placed ones
+        // Find placed siblings to position relative to them
         const allChildren = findChildren(placedParent);
-        // Clear existing positions so we can re-center evenly
-        for (const child of allChildren) {
-          positions.delete(child.id);
+        const placedSiblings = allChildren.filter(c => positions.has(c.id));
+        const unplacedSiblings = allChildren.filter(c => !positions.has(c.id));
+
+        let startX;
+        if (placedSiblings.length > 0) {
+          // Place after the rightmost placed sibling
+          startX = Math.max(...placedSiblings.map(c => positions.get(c.id).x)) + NODE_SLOT;
+        } else {
+          // Center under parents
+          const spPos = placedParent.spouseId ? positions.get(placedParent.spouseId) : null;
+          const midX = spPos ? (parentPos.x + spPos.x) / 2 : parentPos.x;
+          startX = midX - ((unplacedSiblings.length - 1) * NODE_SLOT) / 2;
         }
-        placeChildrenCentered(allChildren, midX, childY);
+        for (const child of unplacedSiblings) {
+          place(child, startX, childY);
+          startX += NODE_SLOT;
+        }
       } else {
         place(person, cursor + NODE_SLOT, genYMap[person.generation] ?? PADDING);
         cursor += NODE_SLOT;
@@ -261,6 +343,22 @@ export function TreeRenderer({ onNodeClick }) {
     }
 
     return svg;
+  }
+
+  // Collect siblings of grandparents that aren't themselves grandparents
+  function collectGPSiblings(gpArray) {
+    const gpIds = new Set(gpArray.map(g => g.id));
+    const siblings = [];
+    const seen = new Set();
+    for (const gp of gpArray) {
+      for (const sib of familyStore.getSiblings(gp.id)) {
+        if (!gpIds.has(sib.id) && !seen.has(sib.id)) {
+          seen.add(sib.id);
+          siblings.push(sib);
+        }
+      }
+    }
+    return siblings;
   }
 
   // Find children via both forward (childIds) and reverse (parentIds) lookup
@@ -313,13 +411,6 @@ export function TreeRenderer({ onNodeClick }) {
     const xs = people.filter(Boolean).map(p => positions.get(p.id)?.x).filter(x => x != null);
     if (xs.length === 0) return PADDING;
     return (Math.min(...xs) + Math.max(...xs)) / 2;
-  }
-
-  function getParentMidX(mother, father) {
-    const mx = mother ? positions.get(mother.id)?.x : null;
-    const fx = father ? positions.get(father.id)?.x : null;
-    if (mx != null && fx != null) return (mx + fx) / 2;
-    return mx ?? fx ?? null;
   }
 
   function placeCouple(gps, centerX, y) {

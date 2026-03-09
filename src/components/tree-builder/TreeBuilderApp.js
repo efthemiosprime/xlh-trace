@@ -7,7 +7,8 @@ import { TreeActionButtons } from './TreeActionButtons.js';
 import { TreeLegend } from '../tree/TreeLegend.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { Modal } from '../shared/Modal.js';
-import { SEX, RELATIONSHIP, GENERATION } from '../../data/constants.js';
+import { SEX, RELATIONSHIP, GENERATION, relationshipLabel } from '../../data/constants.js';
+import { exportTreePDF } from '../../utils/pdfExport.js';
 
 export function TreeBuilderApp() {
   const root = h('div', { className: 'tree-builder' });
@@ -36,6 +37,13 @@ export function TreeBuilderApp() {
           className: 'btn btn-ghost btn-sm',
           href: 'index.html',
         }, 'Wizard Mode'),
+        h('button', {
+          className: 'btn btn-secondary btn-sm no-print',
+          onClick: () => {
+            const svgEl = root.querySelector('.tree-svg');
+            if (svgEl) exportTreePDF(svgEl);
+          },
+        }, 'Export PDF'),
         h('button', {
           className: 'btn btn-ghost btn-sm',
           onClick: () => {
@@ -358,7 +366,7 @@ export function TreeBuilderApp() {
     }, 'Remove from Tree');
 
     const modal = Modal({
-      title: `Edit ${person.name}`,
+      title: `Edit ${person.name} (${relationshipLabel(person)})`,
       content: form,
       footerLeft: removeBtn,
       onSave: () => {
