@@ -19,7 +19,7 @@ export function spouseLine(x1, y1, x2, y2, color) {
   });
 }
 
-export function siblingBar(parentMidX, parentY, childPositions, nodeSize, { parentColor } = {}) {
+export function siblingBar(parentMidX, parentY, childPositions, nodeSize, { parentColor, noTrunk } = {}) {
   const half = nodeSize / 2;
   const g = svgEl('g');
 
@@ -27,13 +27,15 @@ export function siblingBar(parentMidX, parentY, childPositions, nodeSize, { pare
 
   const midY = parentY + half + 30;
 
-  // Vertical from parent couple midpoint down
-  g.appendChild(svgEl('line', {
-    x1: parentMidX, y1: parentY + half,
-    x2: parentMidX, y2: midY,
-    class: 'tree-connector',
-    ...colorAttrs(parentColor),
-  }));
+  // Vertical from parent couple midpoint down (skip when no real parent exists)
+  if (!noTrunk) {
+    g.appendChild(svgEl('line', {
+      x1: parentMidX, y1: parentY + half,
+      x2: parentMidX, y2: midY,
+      class: 'tree-connector',
+      ...colorAttrs(parentColor),
+    }));
+  }
 
   if (childPositions.length === 1) {
     const [cx, cy, color] = childPositions[0];

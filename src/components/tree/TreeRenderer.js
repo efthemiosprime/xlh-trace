@@ -118,7 +118,7 @@ export function TreeRenderer({ onNodeClick }) {
       // Left extent from spouse's x: mother side + maternal siblings or GP siblings
       const spouseParentLeft = spouseParentsArr.length > 0
         ? spouseHalfCouple + Math.max(spouseMatSibWidth, spouseMatGPSibExtent) : 0;
-      if (probandParentRight + spouseParentLeft > 0) {
+      if (probandParentRight > 0 && spouseParentLeft > 0) {
         probandSpouseGap = Math.max(COUPLE_GAP, probandParentRight + NODE_SLOT + spouseParentLeft);
       }
     }
@@ -323,7 +323,32 @@ export function TreeRenderer({ onNodeClick }) {
     svg.setAttribute('height', svgHeight);
 
     const connectorGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    drawConnectors(connectorGroup);
+    // Collect sibling groups that need explicit connectors (no parent exists in tree)
+    const siblingGroups = [];
+
+    // Parent-level: mother + her siblings, father + his siblings (when no GPs exist)
+    if (mother && maternalSiblings.length > 0 && maternalGPs.length === 0) {
+      siblingGroups.push([[mother], maternalSiblings]);
+    }
+    if (father && paternalSiblings.length > 0 && paternalGPs.length === 0) {
+      siblingGroups.push([[father], paternalSiblings]);
+    }
+    if (spouseMother && spouseMatSiblings.length > 0 && spouseMatGPs.length === 0) {
+      siblingGroups.push([[spouseMother], spouseMatSiblings]);
+    }
+    if (spouseFather && spousePatSiblings.length > 0 && spousePatGPs.length === 0) {
+      siblingGroups.push([[spouseFather], spousePatSiblings]);
+    }
+
+    // GP-level: grandparents + their siblings (when no great-grandparents exist)
+    siblingGroups.push(
+      [maternalGPs, maternalGPSibs],
+      [paternalGPs, paternalGPSibs],
+      [spouseMatGPs, spouseMatGPSibs],
+      [spousePatGPs, spousePatGPSibs],
+    );
+
+    drawConnectors(connectorGroup, { siblingGroups });
     svg.appendChild(connectorGroup);
 
     const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
@@ -424,7 +449,35 @@ export function TreeRenderer({ onNodeClick }) {
     }
   }
 
-  function drawConnectors(g) {
+  function drawGPSiblingConnectors(g, gpArray, gpSibs) {
+    if (gpSibs.length === 0 || gpArray.length === 0) return;
+
+    const gpPositions = gpArray.map(gp => positions.get(gp.id)).filter(Boolean);
+    if (gpPositions.length === 0) return;
+    const coupleMidX = gpPositions.reduce((sum, p) => sum + p.x, 0) / gpPositions.length;
+    const gpY = gpPositions[0].y;
+
+    // Virtual parent Y so siblingBar's horizontal bar lands above the GP nodes
+    // siblingBar places bar at parentY + NODE_SIZE/2 + 30, we want bar at gpY - NODE_SIZE/2 - 10
+    const virtualParentY = gpY - NODE_SIZE - 10 - 30;
+
+    // Collect all child positions: grandparents + their siblings
+    const allChildPositions = [];
+    for (const gp of gpArray) {
+      const pos = positions.get(gp.id);
+      if (pos) allChildPositions.push([pos.x, pos.y, personColor(gp)]);
+    }
+    for (const sib of gpSibs) {
+      const pos = positions.get(sib.id);
+      if (pos) allChildPositions.push([pos.x, pos.y, personColor(sib)]);
+    }
+
+    if (allChildPositions.length > 1) {
+      g.appendChild(siblingBar(coupleMidX, virtualParentY, allChildPositions, NODE_SIZE, { noTrunk: true }));
+    }
+  }
+
+  function drawConnectors(g, { siblingGroups = [] } = {}) {
     const all = familyStore.getAll();
     const drawnSpouses = new Set();
     const drawnParentGroups = new Set();
@@ -494,6 +547,11 @@ export function TreeRenderer({ onNodeClick }) {
       if (childPositions.length > 0) {
         g.appendChild(siblingBar(midX, parentPos.y, childPositions, NODE_SIZE, { parentColor }));
       }
+    }
+
+    // Sibling connectors for groups without a parent node in the tree
+    for (const [anchors, sibs] of siblingGroups) {
+      drawGPSiblingConnectors(g, anchors, sibs);
     }
   }
 
