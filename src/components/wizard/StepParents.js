@@ -1,7 +1,7 @@
 import { h } from '../../utils/dom.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { PersonCard } from '../shared/PersonCard.js';
-import { Modal } from '../shared/Modal.js';
+import { InlinePanel } from '../shared/InlinePanel.js';
 import { familyStore } from '../../data/FamilyStore.js';
 import { RELATIONSHIP, GENERATION, SEX, XLH_STATUS } from '../../data/constants.js';
 
@@ -10,6 +10,11 @@ export function StepParents() {
   const spouse = proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
   const container = h('div');
   let activeTab = 'proband';
+  let activePanel = null;
+
+  function closeActivePanel() {
+    if (activePanel) { activePanel.close(); activePanel = null; }
+  }
 
   function getTarget() {
     return activeTab === 'spouse' ? spouse : proband;
@@ -29,6 +34,7 @@ export function StepParents() {
 
   function render() {
     container.innerHTML = '';
+    activePanel = null;
     const target = getTarget();
     const mother = getMother();
     const father = getFather();
@@ -38,7 +44,6 @@ export function StepParents() {
       h('p', { className: 'step-description' }, `Add ${target.name}'s mother and/or father.`),
     );
 
-    // Tabs (only if spouse exists)
     if (spouse) {
       container.appendChild(renderTabs());
     }
@@ -47,12 +52,16 @@ export function StepParents() {
     container.appendChild(h('h3', { style: 'margin: 1rem 0 0.5rem' }, 'Mother'));
     if (mother) {
       container.appendChild(PersonCard(mother, {
-        onEdit: () => openEditModal(mother),
+        onSave: (person, values) => {
+          familyStore.updatePerson(person.id, values);
+          render();
+        },
         onRemove: () => { familyStore.removePerson(mother.id); render(); },
+        sexLocked: true,
       }));
     } else {
       container.appendChild(
-        h('button', { className: 'add-person-btn', onClick: () => openAddModal(SEX.FEMALE, 'Mother') }, '+ Add Mother')
+        h('button', { className: 'add-person-btn', onClick: (e) => openAddPanel(SEX.FEMALE, 'Mother', e.currentTarget) }, '+ Add Mother')
       );
     }
 
@@ -60,12 +69,16 @@ export function StepParents() {
     container.appendChild(h('h3', { style: 'margin: 1rem 0 0.5rem' }, 'Father'));
     if (father) {
       container.appendChild(PersonCard(father, {
-        onEdit: () => openEditModal(father),
+        onSave: (person, values) => {
+          familyStore.updatePerson(person.id, values);
+          render();
+        },
         onRemove: () => { familyStore.removePerson(father.id); render(); },
+        sexLocked: true,
       }));
     } else {
       container.appendChild(
-        h('button', { className: 'add-person-btn', onClick: () => openAddModal(SEX.MALE, 'Father') }, '+ Add Father')
+        h('button', { className: 'add-person-btn', onClick: (e) => openAddPanel(SEX.MALE, 'Father', e.currentTarget) }, '+ Add Father')
       );
     }
   }
@@ -84,12 +97,13 @@ export function StepParents() {
     return h('div', { className: 'side-tabs' }, [probandTab, spouseTab]);
   }
 
-  function openAddModal(sex, label) {
+  function openAddPanel(sex, _label, triggerBtn) {
+    closeActivePanel();
     const target = getTarget();
     const form = PersonForm({ sex, sexLocked: true, xlhStatus: XLH_STATUS.UNKNOWN });
-    Modal({
-      title: `Add ${label}`,
+    activePanel = InlinePanel({
       content: form,
+      replaceTarget: triggerBtn,
       onSave: () => {
         if (!form.isValid()) return false;
         const parent = familyStore.createPerson({
@@ -99,7 +113,6 @@ export function StepParents() {
         });
         familyStore.setParentChild(parent.id, target.id);
 
-        // Set parents as spouses of each other
         const otherParent = sex === SEX.FEMALE ? getFather() : getMother();
         if (otherParent) {
           familyStore.setSpouse(parent.id, otherParent.id);
@@ -107,19 +120,7 @@ export function StepParents() {
 
         render();
       },
-    });
-  }
-
-  function openEditModal(person) {
-    const form = PersonForm({ name: person.name, sex: person.sex, xlhStatus: person.xlhStatus, sexLocked: true });
-    Modal({
-      title: 'Edit Parent',
-      content: form,
-      onSave: () => {
-        if (!form.isValid()) return false;
-        familyStore.updatePerson(person.id, form.getValues());
-        render();
-      },
+      onCancel: () => { activePanel = null; },
     });
   }
 

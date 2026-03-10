@@ -2,7 +2,7 @@ import { h } from '../../utils/dom.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { PersonCard } from '../shared/PersonCard.js';
 import { PersonList } from '../shared/PersonList.js';
-import { Modal } from '../shared/Modal.js';
+import { InlinePanel } from '../shared/InlinePanel.js';
 import { familyStore } from '../../data/FamilyStore.js';
 import { RELATIONSHIP, GENERATION, SEX, XLH_STATUS } from '../../data/constants.js';
 
@@ -12,9 +12,15 @@ export function StepChildren() {
   const getSpouse = () => proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
 
   const container = h('div');
+  let activePanel = null;
+
+  function closeActivePanel() {
+    if (activePanel) { activePanel.close(); activePanel = null; }
+  }
 
   function render() {
     container.innerHTML = '';
+    activePanel = null;
 
     container.append(
       h('h2', {}, 'Family'),
@@ -27,9 +33,11 @@ export function StepChildren() {
 
     if (spouse) {
       container.appendChild(PersonCard(spouse, {
-        onEdit: () => openSpouseEditModal(spouse),
+        onSave: (person, values) => {
+          familyStore.updatePerson(person.id, values);
+          render();
+        },
         onRemove: () => {
-          // Unlink children from spouse
           const children = getChildren();
           for (const child of children) {
             child.parentIds = child.parentIds.filter(id => id !== spouse.id);
@@ -37,13 +45,14 @@ export function StepChildren() {
           familyStore.removePerson(spouse.id);
           render();
         },
+        sexLocked: true,
       }));
     } else {
       const oppositeSex = proband.sex === SEX.MALE ? SEX.FEMALE : SEX.MALE;
       container.appendChild(
         h('button', {
           className: 'add-person-btn',
-          onClick: () => openSpouseAddModal(oppositeSex),
+          onClick: (e) => openSpouseAdd(oppositeSex, e.currentTarget),
         }, '+ Add Spouse')
       );
     }
@@ -55,22 +64,34 @@ export function StepChildren() {
       people: getChildren(),
       emptyText: 'No children added yet.',
       addLabel: '+ Add Child',
-      onAdd: () => openAddChildModal(),
-      onEdit: (person) => openEditChildModal(person),
+      onAdd: null, // handled manually below
+      onEdit: null, // handled via PersonCard onSave
       onRemove: (person) => {
         familyStore.removePerson(person.id);
+        render();
+      },
+      onSave: (person, values) => {
+        familyStore.updatePerson(person.id, values);
         render();
       },
     });
 
     container.appendChild(list);
+
+    // Add child button
+    const addBtn = h('button', {
+      className: 'add-person-btn',
+      onClick: (e) => openAddChild(e.currentTarget),
+    }, '+ Add Child');
+    container.appendChild(addBtn);
   }
 
-  function openSpouseAddModal(sex) {
+  function openSpouseAdd(sex, triggerBtn) {
+    closeActivePanel();
     const form = PersonForm({ sex, sexLocked: true, xlhStatus: XLH_STATUS.UNKNOWN });
-    Modal({
-      title: 'Add Spouse',
+    activePanel = InlinePanel({
       content: form,
+      replaceTarget: triggerBtn,
       onSave: () => {
         if (!form.isValid()) return false;
         const spouse = familyStore.createPerson({
@@ -79,34 +100,22 @@ export function StepChildren() {
           generation: GENERATION.PROBAND,
         });
         familyStore.setSpouse(proband.id, spouse.id);
-        // Link existing children to spouse
         const children = getChildren();
         for (const child of children) {
           familyStore.setParentChild(spouse.id, child.id);
         }
         render();
       },
+      onCancel: () => { activePanel = null; },
     });
   }
 
-  function openSpouseEditModal(spouse) {
-    const form = PersonForm({ name: spouse.name, sex: spouse.sex, xlhStatus: spouse.xlhStatus, sexLocked: true });
-    Modal({
-      title: 'Edit Spouse',
-      content: form,
-      onSave: () => {
-        if (!form.isValid()) return false;
-        familyStore.updatePerson(spouse.id, form.getValues());
-        render();
-      },
-    });
-  }
-
-  function openAddChildModal() {
+  function openAddChild(triggerBtn) {
+    closeActivePanel();
     const form = PersonForm();
-    Modal({
-      title: 'Add Child',
+    activePanel = InlinePanel({
       content: form,
+      replaceTarget: triggerBtn,
       onSave: () => {
         if (!form.isValid()) return false;
         const child = familyStore.createPerson({
@@ -121,19 +130,7 @@ export function StepChildren() {
         }
         render();
       },
-    });
-  }
-
-  function openEditChildModal(person) {
-    const form = PersonForm({ name: person.name, sex: person.sex, xlhStatus: person.xlhStatus });
-    Modal({
-      title: 'Edit Child',
-      content: form,
-      onSave: () => {
-        if (!form.isValid()) return false;
-        familyStore.updatePerson(person.id, form.getValues());
-        render();
-      },
+      onCancel: () => { activePanel = null; },
     });
   }
 

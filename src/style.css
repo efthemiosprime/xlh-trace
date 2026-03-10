@@ -42,7 +42,7 @@ body {
 }
 
 #app {
-  max-width: 960px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
@@ -55,7 +55,7 @@ h3 { font-size: 1.1rem; }
 
 /* === Header === */
 .app {
-  max-width: 960px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
@@ -147,16 +147,68 @@ h3 { font-size: 1.1rem; }
   font-size: 0.7rem;
   color: var(--color-text-muted);
   margin-top: 6px;
-  white-space: nowrap;
-  max-width: 80px;
   text-align: center;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 120px;
+  word-wrap: break-word;
 }
 
 .progress-step.current .progress-label {
   color: var(--color-primary);
   font-weight: 600;
+}
+
+/* === Two-Column Layout === */
+.app-layout {
+  display: grid;
+  grid-template-columns: 40% 60%;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.app-layout.single-column {
+  grid-template-columns: 1fr;
+}
+
+.tree-preview-panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  position: sticky;
+  top: 1rem;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tree-preview-panel.hidden {
+  display: none;
+}
+
+.tree-preview-content {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.tree-preview-content .tree-svg {
+  display: block;
+  margin: 0 auto;
+  max-width: 100%;
+  height: auto !important;
+  width: auto !important;
+}
+
+.tree-preview-empty {
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  padding: 2rem 1rem;
+}
+
+.wizard-column {
+  min-width: 0;
 }
 
 /* === Wizard === */
@@ -482,6 +534,25 @@ h3 { font-size: 1.1rem; }
   margin-left: auto;
 }
 
+/* === Inline Edit (in-place form editing) === */
+.inline-edit-form {
+  margin: 0.5rem 0;
+  animation: fadeIn 0.2s ease;
+}
+
+.inline-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.person-card--editing {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 1rem;
+}
+
 /* === Tree === */
 .tree-container {
   overflow-x: auto;
@@ -684,6 +755,16 @@ h3 { font-size: 1.1rem; }
 }
 
 /* === Responsive === */
+@media (max-width: 900px) {
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+  .tree-preview-panel {
+    position: static;
+    max-height: 300px;
+  }
+}
+
 @media (max-width: 600px) {
   #app { padding: 1rem 0.5rem; }
   .wizard-container { padding: 1.25rem; }
@@ -703,6 +784,8 @@ h3 { font-size: 1.1rem; }
   .action-group,
   .context-menu { display: none !important; }
   #app, .tree-builder { max-width: none; padding: 0; }
+  .app-layout { grid-template-columns: 1fr; }
+  .tree-preview-panel { display: none; }
   .wizard-container { box-shadow: none; padding: 0.5rem; }
   .tree-container { overflow: visible; }
   .tree-svg { max-width: 100%; height: auto; }

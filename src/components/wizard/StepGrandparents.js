@@ -1,7 +1,7 @@
 import { h } from '../../utils/dom.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { PersonCard } from '../shared/PersonCard.js';
-import { Modal } from '../shared/Modal.js';
+import { InlinePanel } from '../shared/InlinePanel.js';
 import { familyStore } from '../../data/FamilyStore.js';
 import { RELATIONSHIP, GENERATION, SEX, XLH_STATUS } from '../../data/constants.js';
 
@@ -10,6 +10,11 @@ export function StepGrandparents() {
   const spouse = proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
   const container = h('div');
   let activeTab = 'proband';
+  let activePanel = null;
+
+  function closeActivePanel() {
+    if (activePanel) { activePanel.close(); activePanel = null; }
+  }
 
   function getTarget() {
     return activeTab === 'spouse' ? spouse : proband;
@@ -17,6 +22,7 @@ export function StepGrandparents() {
 
   function render() {
     container.innerHTML = '';
+    activePanel = null;
     const target = getTarget();
     const parents = familyStore.getParents(target.id);
 
@@ -48,12 +54,16 @@ export function StepGrandparents() {
       ]));
       if (gm) {
         container.appendChild(PersonCard(gm, {
-          onEdit: () => openEditModal(gm),
+          onSave: (person, values) => {
+            familyStore.updatePerson(person.id, values);
+            render();
+          },
           onRemove: () => { familyStore.removePerson(gm.id); render(); },
+          sexLocked: true,
         }));
       } else {
         container.appendChild(
-          h('button', { className: 'add-person-btn', style: 'margin-bottom: 0.75rem', onClick: () => openAddModal(parent, SEX.FEMALE, `${side} Grandmother`) }, `+ Add ${side} Grandmother`)
+          h('button', { className: 'add-person-btn', style: 'margin-bottom: 0.75rem', onClick: (e) => openAddPanel(parent, SEX.FEMALE, `${side} Grandmother`, e.currentTarget) }, `+ Add ${side} Grandmother`)
         );
       }
 
@@ -63,12 +73,16 @@ export function StepGrandparents() {
       ]));
       if (gf) {
         container.appendChild(PersonCard(gf, {
-          onEdit: () => openEditModal(gf),
+          onSave: (person, values) => {
+            familyStore.updatePerson(person.id, values);
+            render();
+          },
           onRemove: () => { familyStore.removePerson(gf.id); render(); },
+          sexLocked: true,
         }));
       } else {
         container.appendChild(
-          h('button', { className: 'add-person-btn', style: 'margin-bottom: 0.75rem', onClick: () => openAddModal(parent, SEX.MALE, `${side} Grandfather`) }, `+ Add ${side} Grandfather`)
+          h('button', { className: 'add-person-btn', style: 'margin-bottom: 0.75rem', onClick: (e) => openAddPanel(parent, SEX.MALE, `${side} Grandfather`, e.currentTarget) }, `+ Add ${side} Grandfather`)
         );
       }
     }
@@ -88,11 +102,12 @@ export function StepGrandparents() {
     return h('div', { className: 'side-tabs' }, [probandTab, spouseTab]);
   }
 
-  function openAddModal(parentNode, sex, label) {
+  function openAddPanel(parentNode, sex, _label, triggerBtn) {
+    closeActivePanel();
     const form = PersonForm({ sex, sexLocked: true, xlhStatus: XLH_STATUS.UNKNOWN });
-    Modal({
-      title: `Add ${label}`,
+    activePanel = InlinePanel({
       content: form,
+      replaceTarget: triggerBtn,
       onSave: () => {
         if (!form.isValid()) return false;
         const gp = familyStore.createPerson({
@@ -102,13 +117,11 @@ export function StepGrandparents() {
         });
         familyStore.setParentChild(gp.id, parentNode.id);
 
-        // Set grandparents as spouses if both exist
         const otherGP = familyStore.getParents(parentNode.id).find(p => p.id !== gp.id);
         if (otherGP) {
           familyStore.setSpouse(gp.id, otherGP.id);
         }
 
-        // Also set as parent of aunts/uncles (siblings of this parent)
         const siblings = familyStore.getSiblings(parentNode.id);
         for (const sib of siblings) {
           familyStore.setParentChild(gp.id, sib.id);
@@ -116,19 +129,7 @@ export function StepGrandparents() {
 
         render();
       },
-    });
-  }
-
-  function openEditModal(person) {
-    const form = PersonForm({ name: person.name, sex: person.sex, xlhStatus: person.xlhStatus, sexLocked: true });
-    Modal({
-      title: 'Edit Grandparent',
-      content: form,
-      onSave: () => {
-        if (!form.isValid()) return false;
-        familyStore.updatePerson(person.id, form.getValues());
-        render();
-      },
+      onCancel: () => { activePanel = null; },
     });
   }
 

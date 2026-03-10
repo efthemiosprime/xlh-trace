@@ -1,7 +1,7 @@
 import { h } from '../../utils/dom.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { PersonList } from '../shared/PersonList.js';
-import { Modal } from '../shared/Modal.js';
+import { InlinePanel } from '../shared/InlinePanel.js';
 import { familyStore } from '../../data/FamilyStore.js';
 import { RELATIONSHIP, GENERATION, SEX } from '../../data/constants.js';
 
@@ -10,6 +10,11 @@ export function StepAuntsUncles() {
   const spouse = proband.spouseId ? familyStore.getPerson(proband.spouseId) : null;
   const container = h('div');
   let activeTab = 'proband';
+  let activePanel = null;
+
+  function closeActivePanel() {
+    if (activePanel) { activePanel.close(); activePanel = null; }
+  }
 
   function getTarget() {
     return activeTab === 'spouse' ? spouse : proband;
@@ -17,6 +22,7 @@ export function StepAuntsUncles() {
 
   function render() {
     container.innerHTML = '';
+    activePanel = null;
     const target = getTarget();
     const parents = familyStore.getParents(target.id);
 
@@ -44,8 +50,11 @@ export function StepAuntsUncles() {
         people: siblingsOfParent(),
         emptyText: `No siblings added for ${parent.name}.`,
         addLabel: `+ Add ${label} sibling`,
-        onAdd: () => openAddModal(parent, list, siblingsOfParent),
-        onEdit: (person) => openEditModal(person, list, siblingsOfParent),
+        onAdd: null,
+        onSave: (person, values) => {
+          familyStore.updatePerson(person.id, values);
+          list.update(siblingsOfParent());
+        },
         onRemove: (person) => {
           familyStore.removePerson(person.id);
           list.update(siblingsOfParent());
@@ -53,6 +62,13 @@ export function StepAuntsUncles() {
       });
 
       container.appendChild(list);
+
+      // Add button
+      const addBtn = h('button', {
+        className: 'add-person-btn',
+        onClick: (e) => openAddPanel(parent, list, siblingsOfParent, e.currentTarget),
+      }, `+ Add ${label} sibling`);
+      container.appendChild(addBtn);
     }
   }
 
@@ -70,11 +86,12 @@ export function StepAuntsUncles() {
     return h('div', { className: 'side-tabs' }, [probandTab, spouseTab]);
   }
 
-  function openAddModal(parent, list, getSiblings) {
+  function openAddPanel(parent, list, getSiblings, triggerBtn) {
+    closeActivePanel();
     const form = PersonForm();
-    Modal({
-      title: `Add Sibling of ${parent.name}`,
+    activePanel = InlinePanel({
       content: form,
+      replaceTarget: triggerBtn,
       onSave: () => {
         if (!form.isValid()) return false;
         const sibling = familyStore.createPerson({
@@ -82,28 +99,14 @@ export function StepAuntsUncles() {
           relationship: RELATIONSHIP.AUNT_UNCLE,
           generation: GENERATION.PARENT,
         });
-        // Link as sibling (works even before grandparents are added)
         familyStore.setSibling(parent.id, sibling.id);
-        // Also share any existing grandparents
         const grandparents = familyStore.getParents(parent.id);
         for (const gp of grandparents) {
           familyStore.setParentChild(gp.id, sibling.id);
         }
         list.update(getSiblings());
       },
-    });
-  }
-
-  function openEditModal(person, list, getSiblings) {
-    const form = PersonForm({ name: person.name, sex: person.sex, xlhStatus: person.xlhStatus });
-    Modal({
-      title: 'Edit Aunt/Uncle',
-      content: form,
-      onSave: () => {
-        if (!form.isValid()) return false;
-        familyStore.updatePerson(person.id, form.getValues());
-        list.update(getSiblings());
-      },
+      onCancel: () => { activePanel = null; },
     });
   }
 

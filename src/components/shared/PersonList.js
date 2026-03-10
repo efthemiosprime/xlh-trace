@@ -1,7 +1,7 @@
 import { h, clearElement } from '../../utils/dom.js';
 import { PersonCard } from './PersonCard.js';
 
-export function PersonList({ people = [], emptyText = 'No one added yet.', onAdd, onEdit, onRemove, addLabel = '+ Add Person' }) {
+export function PersonList({ people = [], emptyText = 'No one added yet.', onAdd, onEdit, onRemove, onSave, addLabel = '+ Add Person' }) {
   const container = h('div', { className: 'person-list' });
 
   function render() {
@@ -11,7 +11,11 @@ export function PersonList({ people = [], emptyText = 'No one added yet.', onAdd
       container.appendChild(h('div', { className: 'person-list-empty' }, emptyText));
     } else {
       for (const person of people) {
-        container.appendChild(PersonCard(person, { onEdit, onRemove }));
+        container.appendChild(PersonCard(person, {
+          onEdit: onEdit || undefined,
+          onRemove,
+          onSave: onSave || undefined,
+        }));
       }
     }
 
