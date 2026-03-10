@@ -7,6 +7,7 @@ import { TreeLegend } from '../tree/TreeLegend.js';
 import { PersonForm } from '../shared/PersonForm.js';
 import { Modal } from '../shared/Modal.js';
 import { exportTreePDF } from '../../utils/pdfExport.js';
+import { shareTreePDF } from '../../utils/shareExport.js';
 import { relationshipLabel } from '../../data/constants.js';
 
 export function StepTreeView({ onPrev }) {
@@ -36,12 +37,16 @@ export function StepTreeView({ onPrev }) {
     treeContainer.appendChild(svg);
     container.appendChild(treeContainer);
 
-    // Export PDF button
-    container.appendChild(h('div', { style: 'text-align: center; margin-top: 0.75rem;' }, [
+    // Export / Share buttons
+    container.appendChild(h('div', { style: 'text-align: center; margin-top: 0.75rem; display: flex; justify-content: center; gap: 0.5rem;' }, [
       h('button', {
         className: 'btn btn-secondary btn-sm no-print',
         onClick: () => exportTreePDF(svg),
       }, 'Export PDF'),
+      h('button', {
+        className: 'btn btn-secondary btn-sm no-print',
+        onClick: () => shareTreePDF(svg),
+      }, 'Share'),
     ]));
 
     // Legend

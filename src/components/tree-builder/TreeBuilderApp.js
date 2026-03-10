@@ -9,6 +9,7 @@ import { PersonForm } from '../shared/PersonForm.js';
 import { Modal } from '../shared/Modal.js';
 import { SEX, RELATIONSHIP, GENERATION, relationshipLabel } from '../../data/constants.js';
 import { exportTreePDF } from '../../utils/pdfExport.js';
+import { shareTreePDF } from '../../utils/shareExport.js';
 
 export function TreeBuilderApp() {
   const root = h('div', { className: 'tree-builder' });
@@ -44,6 +45,13 @@ export function TreeBuilderApp() {
             if (svgEl) exportTreePDF(svgEl);
           },
         }, 'Export PDF'),
+        h('button', {
+          className: 'btn btn-secondary btn-sm no-print',
+          onClick: () => {
+            const svgEl = root.querySelector('.tree-svg');
+            if (svgEl) shareTreePDF(svgEl);
+          },
+        }, 'Share'),
         h('button', {
           className: 'btn btn-ghost btn-sm',
           onClick: () => {

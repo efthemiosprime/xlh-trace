@@ -113,7 +113,7 @@ function prepareExportSVG(svgElement) {
  * @param {SVGElement} svgElement - The rendered tree SVG from TreeRenderer
  * @returns {Promise<void>}
  */
-export async function exportTreePDF(svgElement) {
+async function buildTreePDF(svgElement) {
   // Prepare a self-contained SVG clone
   const svg = prepareExportSVG(svgElement);
 
@@ -196,8 +196,30 @@ export async function exportTreePDF(svgElement) {
       height: renderedH,
     });
 
-    pdf.save('xlh-family-tree.pdf');
+    return pdf;
   } finally {
     document.body.removeChild(svg);
   }
+}
+
+/**
+ * Generate the tree PDF and return it as a Blob.
+ * @param {SVGElement} svgElement
+ * @returns {Promise<Blob>}
+ */
+export async function generateTreePDFBlob(svgElement) {
+  const pdf = await buildTreePDF(svgElement);
+  if (!pdf) return null;
+  return pdf.output('blob');
+}
+
+/**
+ * Export the tree SVG to a PDF file and trigger download.
+ * @param {SVGElement} svgElement
+ * @returns {Promise<void>}
+ */
+export async function exportTreePDF(svgElement) {
+  const pdf = await buildTreePDF(svgElement);
+  if (!pdf) return;
+  pdf.save('xlh-family-tree.pdf');
 }
