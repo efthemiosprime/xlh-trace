@@ -1,0 +1,60 @@
+// Start screen (Figma 0.0 / UI-0). Layout only — colors/sizes from tokens (var()).
+
+.start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100dvh;            // preview presentation; host controls height in-iframe
+  padding: var(--space-component-xs);
+  background: var(--color-brand-steel);
+}
+
+.start__card {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-component-md) var(--space-component-sm);
+  // .ds-card supplies snow bg + lime border + card radius
+}
+
+.start__icon {
+  width: 104px;
+  margin-bottom: var(--space-component-sm);
+
+  svg { width: 100%; height: auto; }
+}
+
+.start__title {
+  margin: 0;
+  text-transform: uppercase;
+  color: var(--color-text);
+  // responsive condensed display type (ds-h2 = 48; allow shrink on narrow cards)
+  font-size: clamp(2rem, 11vw, var(--text-h2));
+  line-height: 1.05;
+}
+
+.start__title-accent { color: var(--color-btn-cta-bg); } // magenta "XLH"
+
+.start__lead {
+  margin: var(--space-component-sm) 0 0;
+  color: var(--color-text);
+}
+
+.start__note {
+  margin: var(--space-micro-lg) 0 0;
+  color: var(--color-text);
+}
+
+.start__cta {
+  margin-top: var(--space-component-sm);
+}
+
+.start__disclaimer {
+  margin: var(--space-component-sm) 0 0;
+  color: var(--color-text);
+}
+
+.start__consent {
+  margin: var(--space-component-sm) 0 0;
+  color: var(--color-text);
+  text-align: center;
+}
