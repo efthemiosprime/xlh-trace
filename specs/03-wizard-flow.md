@@ -6,6 +6,45 @@ A **pure** state machine drives step order, side-of-family focus, option gating,
 end-of-experience exits. No DOM. Module: `src/wizard/WizardFlow.js`. The UI renders
 whatever the machine reports; the store holds the people.
 
+## View state & screen tracking (single page, no router)
+
+Because the tool is a single embedded page with **no URL navigation** (`EMBED-1`), the flow
+machine is the single source of truth for *what is on screen*. It tracks an explicit
+**view state**, not a route.
+
+### `FLOW-STATE` View-state shape
+```js
+{
+  step: 'SELF' | 'CHILDREN' | … | 'SUMMARY',  // logical step (table below)
+  screen: 'UI-1.1' | 'UI-1.2' | 'UI-3.1' | …, // the concrete Figma sub-screen on display
+  overlay: null | 'symptoms-list' | 'add-partner' | 'add-their-children'
+           | 'limit-reached' | 'reset-confirm' | 'email' | 'email-sent',
+  focusPerson: 'SELF' | 'PARTNER',            // FLOW-3
+  isEnded: boolean,                            // FLOW-8
+}
+```
+- `screen` is one of the ids enumerated in [04-screens.md](04-screens.md) (`UI-*`). A step
+  may pass through several sub-screens (e.g. SELF: landing → form `UI-1.1` → with-symptoms
+  `UI-1.2` → review `UI-1.6`); the machine names the current one so the renderer is a pure
+  `view = f(viewState)` (R3).
+- `overlay` is tracked separately from `screen` so an overlay renders **over** the current
+  screen and closing it restores the screen beneath unchanged (`FLOW-9`).
+
+### `FLOW-STATE-1` Back stack (no browser history)
+The machine keeps an internal stack of prior view states. `back()` pops it (closing an open
+overlay first, before stepping). This gives Back/▸ navigation without relying on the
+browser history API — which is unreliable/surprising inside a cross-origin iframe.
+
+### `FLOW-STATE-2` Change notification
+The machine exposes `subscribe(fn)` (or reuses the store's pub/sub); every transition emits
+the new view state so exactly one render path runs and the iframe re-measures height
+(`EMBED-3`). No screen is shown by directly poking the DOM from a handler.
+
+### `FLOW-STATE-3` Optional hash mirroring (deferred)
+Mirroring `step` to `location.hash` for deep-linking/refresh-restore is **out of scope** for
+v1 (no persistence per `EMBED-2`; refresh restarts). Listed as a later option, not a
+requirement.
+
 ## Steps (PDF p2)
 
 | Index | Id | Title | Optional? | Source |

@@ -39,7 +39,7 @@ The single biggest change rippling through the codebase is the **data-model swap
 |------|-------------|--------------|
 | `utils/dom.js`, `utils/events.js`, `utils/id.js` | ♻️ **Reuse as-is** | none |
 | `data/constants.js` | 🔧 **Extend** | add `XLH_ANSWER`, `XLH_RESULT`, new `RELATIONSHIP`/`STEPS`, `SYMPTOMS` catalog; keep file (no new `model.js` — tests will import from here) |
-| `data/FamilyStore.js` | 🔧 **Adjust** | new fields in `createPerson`; add `getPartner()`, `count()`, `canAddPerson()` (DM-8); keep pub/sub + queries |
+| `data/FamilyStore.js` | 🔧 **Adjust** | new fields in `createPerson`; add `getPartner()`, `count()`, `canAddPerson()` (DM-8); **remove localStorage save/load** → in-memory only (DM-10, EMBED-2); keep pub/sub + queries |
 | `engine/InheritanceEngine.js` | 🆕 **Replace** → `engine/StatusEngine.js` | new deterministic model (INH-1..11); retire old file |
 | `engine/TreeAnalyzer.js` | 🔧 **Adjust** | origin/summary against `result`/`chance`; reuse ancestor-tracing |
 | `components/wizard/WizardContainer.js` | 🔧 **Adjust** | drive from new `WizardFlow`; 7 steps, landing screens, skip, end-experience, limit |
@@ -57,7 +57,7 @@ The single biggest change rippling through the codebase is the **data-model swap
 | `utils/pdfExport.js` | 🔧 **Extend** | keep svg2pdf tree core (PDF-1); add table pages (PDF-2/3), symptoms page (PDF-4); new legend |
 | `utils/shareExport.js` | ♻️ **Reuse** | email/share (UI-7.3/7.4) |
 | `components/App.js`, `ProgressBar.js` | 🔧 **Adjust** | 7-step progress strip labels (UI-PROG) |
-| `components/tree-builder/*`, `tree-builder.html` | ⏸️ **Defer** | secondary mode; align after wizard is green |
+| `components/tree-builder/*`, `tree-builder.html` | 🗑️ **Retire** | single embedded page (EMBED-1); drop the second entry from the Vite build |
 | root `SPEC.md` | 🗑️ **Supersede** | replaced by `specs/` (leave note) |
 
 Legend: ♻️ reuse · 🔧 adjust · 🆕 new · ⏸️ defer · 🗑️ retire
@@ -90,16 +90,20 @@ then store, then UI/visual, then PDF.
 - **Spec:** [03-wizard-flow.md](03-wizard-flow.md) (FLOW-1..9, FLOW-LIMIT).
 - **Tests:** `tests/wizard-flow.spec.js` (to write): step order incl. SIBLINGS; skip;
   partner-side shift (FLOW-3); disabled-Dad (FLOW-5a); Neither/IDK → SUMMARY (FLOW-8);
-  maternal/paternal side (FLOW-6); 50-limit gate (FLOW-LIMIT).
+  maternal/paternal side (FLOW-6); 50-limit gate (FLOW-LIMIT); **view-state/screen tracking
+  + overlay + back-stack (FLOW-STATE..STATE-2)**.
 - **Impl:** `src/wizard/WizardFlow.js` (pure; no DOM; takes a store-like dependency).
+  Tracks the `{ step, screen, overlay, focusPerson, isEnded }` view state and a back stack.
 - **DoD:** flow tests green.
 - **🛑 Commit:** `feat(wizard): add pure wizard flow state machine (FLOW-1..9)`
 
 ### Phase 3 — Domain model & store
 - **Spec:** [01-domain-model.md](01-domain-model.md) (DM-1..9).
 - **Tests:** `tests/store.spec.js`: new fields; `getPartner`/`count`/`canAddPerson`;
-  50-person limit (DM-8); symptoms gating (DM-7); reference cleanup on remove.
-- **Impl:** adjust `FamilyStore.js` + `constants.js` (relationships, symptoms catalog).
+  50-person limit (DM-8); symptoms gating (DM-7); reference cleanup on remove;
+  **no localStorage writes — in-memory only (DM-10)**.
+- **Impl:** adjust `FamilyStore.js` + `constants.js` (relationships, symptoms catalog);
+  **remove localStorage save/load**.
 - **DoD:** store tests green; engine consumes store output unchanged.
 - **🛑 Commit:** `feat(store): migrate family store to new data model (DM-1..9)`
 
@@ -131,9 +135,18 @@ then store, then UI/visual, then PDF.
 - **DoD:** Download & Share produce the 4-page PDF; matches Figma export.
 - **🛑 Commit:** `feat(pdf): generate 4-page family-tree PDF export (PDF-1..6)`
 
-### Phase 7 — Polish (later)
-- localStorage persistence round-trip; reset confirmation (UI-7.2); a11y (focus, ARIA,
-  keyboard); responsive; align/retire tree-builder mode.
+### Phase 7 — Embedding (iframe in XLHLink.com)
+- **Spec:** [07-embedding.md](07-embedding.md) (EMBED-1..8).
+- **Tests:** `tests/ui/embedding.spec.js` + Playwright: single entry (drop tree-builder
+  input from Vite); auto-height `postMessage` with origin allowlist (EMBED-3); download/
+  share work under iframe `sandbox`/`allow` (EMBED-5); links target `_parent`/`_blank`.
+- **Impl:** height publisher util; single Vite input; host integration snippet/doc.
+- **DoD:** embeds and auto-resizes in a host harness; downloads + mailto work in-iframe.
+- **🛑 Commit:** `feat(embed): single-page iframe embedding with auto-height (EMBED-1..8)`
+
+### Phase 8 — Polish (later)
+- "Start over" clears the in-memory store; reset confirmation (UI-7.2); a11y (focus, ARIA,
+  keyboard); responsive sweep across host widths (EMBED-8).
 - **🛑 Commit(s):** `chore`/`style`/`perf`/`fix(...)` as appropriate per item.
 
 ---
@@ -179,7 +192,11 @@ the phase that needs it: `@testing-library/dom` + **Playwright** (Phase 4), `jsp
 - **Figma over deck on conflicts** (e.g. PDF is 4 pages, not "3 sections").
 - **p14/p15 ambiguity** resolved by the reverse-engineered rule set in
   [02-inheritance-logic.md](02-inheritance-logic.md) — flagged, not silently chosen.
-- **tree-builder mode deferred** — wizard is the primary deliverable per Figma.
+- **Single embedded page** (`EMBED-1`) — one Vite entry; tree-builder mode **retired**.
+- **In-memory only, no persistence** (`DM-10`/`EMBED-2`) — iframe storage is partitioned/
+  blocked and the tool promises not to store data; reload restarts.
+- **No URL router** — the flow machine's view state (`FLOW-STATE`) tracks the current
+  screen + overlay + a back stack; the renderer is `view = f(viewState)`.
 
 ## Open questions (non-blocking; default assumptions in specs)
 

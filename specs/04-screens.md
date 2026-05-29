@@ -4,6 +4,12 @@ Source: Figma `b4bf3fgE9z0ow9hlAXzVuy`, canvas `204:979`. Target: **mobile 360px
 card-based. Pixel-faithful is the goal; build after logic is green. For each screen fetch
 the **mobile `<instance>`** id (not the symbol) via `get_design_context`.
 
+> **Single page, no router.** Every `UI-*` screen below is a *view state*, not a URL — the
+> whole flow lives in one embedded page (`EMBED-1`). The current screen + open overlay are
+> tracked by the flow machine's view state (`FLOW-STATE`), and the renderer is a pure
+> `view = f(viewState)`. The `UI-*` ids are exactly the `screen`/`overlay` values the
+> machine reports.
+
 ## Design system (frame `Components` `1266:31249`)
 
 | Component | Symbol id | Variants |

@@ -74,3 +74,9 @@ The tree supports at most **50** people (PDF p3-C). `store.canAddPerson()` is fa
 `getProband()`, `getPartner()`, `getChildren(id)`, `getParents(id)`, `getSiblings(id)`,
 `getByRelationship(rel)`, `getByGeneration(n)`, `count()`, `getAll()`. Removing a person
 cleans up all dangling `parentIds`/`childIds`/`spouseId` references.
+
+## `DM-10` In-memory only — no persistence
+The store holds state **in memory only**; there is no `localStorage`/`sessionStorage`/
+cookie/IndexedDB persistence. A reload starts fresh; "Start over" clears the store. This is
+required by the iframe-embedding context (`EMBED-2`) and the PII/PHI rule. (Supersedes the
+current `FamilyStore` localStorage save/load, removed in Phase 3.)

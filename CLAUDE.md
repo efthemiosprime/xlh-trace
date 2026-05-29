@@ -46,6 +46,16 @@ Vanilla ES modules + Vite. Tests: Vitest (`node` for logic, jsdom + `@testing-li
 for components), Playwright for E2E + Figma visual regression. PDF: jspdf + svg2pdf.js
 (+ jspdf-autotable for table pages). No UI framework.
 
+## Embedding (single page in an iframe)
+
+The tool is **one page** embedded via `<iframe>` in XLHLink.com ([`specs/07-embedding.md`](specs/07-embedding.md)).
+- **No router, no full-page nav** — the flow machine tracks an in-memory view state
+  (`{ step, screen, overlay, focusPerson, isEnded }` + a back stack); render is `view = f(viewState)`.
+- **In-memory store only** — no `localStorage`/`sessionStorage`/cookies; reload restarts.
+- **Auto-height** — publish content height to the host via `postMessage` with an origin
+  allowlist (never `'*'`). Avoid `100vh`/viewport-anchored layouts.
+- **Outbound links** target `_parent`/`_blank` + `rel="noopener"`; never trap the host.
+
 ## Health-data note (PII/PHI)
 
 This tool states user data "will not be stored, shared, or used for marketing." Never

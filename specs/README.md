@@ -36,6 +36,7 @@ UI screens (pixel-faithful to Figma) are built against the green logic afterward
 | `UI-`   | Screens & components (Figma) | [04-screens.md](04-screens.md) |
 | `PDF-`  | Downloadable PDF export | [05-pdf-export.md](05-pdf-export.md) |
 | `R-`    | Architecture & coding conventions | [06-architecture.md](06-architecture.md) |
+| `EMBED-`| iframe embedding (single page, in XLHLink.com) | [07-embedding.md](07-embedding.md) |
 
 ## Status legend used throughout
 
