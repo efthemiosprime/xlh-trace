@@ -1,4 +1,5 @@
-// Start screen (Figma 0.0 / UI-0). Layout only — colors/sizes from tokens (var()).
+// Start screen (Figma 0.0 / UI-0). Layout only — colors/sizes from tokens.
+@use '../styles/breakpoints' as bp;
 
 .start {
   display: flex;
@@ -7,6 +8,8 @@
   min-height: 100dvh;            // preview presentation; host controls height in-iframe
   padding: var(--space-component-xs);
   background: var(--color-brand-steel);
+
+  @include bp.desktop { padding: var(--space-component-xl); }
 }
 
 .start__card {
@@ -14,47 +17,71 @@
   max-width: 360px;
   padding: var(--space-component-md) var(--space-component-sm);
   // .ds-card supplies snow bg + lime border + card radius
+
+  @include bp.desktop {
+    max-width: 960px;
+    padding: var(--space-component-xl);
+  }
 }
 
+// main region: column on mobile, two-column on desktop
+.start__main {
+  display: flex;
+  flex-direction: column;
+
+  @include bp.desktop {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-component-xl);
+  }
+}
+
+.start__visual {
+  @include bp.desktop { flex: 1 1 0; min-width: 0; }
+}
+
+.start__content {
+  @include bp.desktop { flex: 1 1 0; min-width: 0; }
+}
+
+// mobile family icon vs desktop sample tree — show one per breakpoint
 .start__icon {
   width: 104px;
   margin-bottom: var(--space-component-sm);
-
   svg { width: 100%; height: auto; }
+
+  @include bp.desktop { display: none; }
+}
+
+.start__tree {
+  display: none;
+  @include bp.desktop {
+    display: block;
+    max-width: 320px;
+    margin: 0 auto;
+    svg { width: 100%; height: auto; }
+  }
 }
 
 .start__title {
   margin: 0;
   text-transform: uppercase;
   color: var(--color-text);
-  // responsive condensed display type (ds-h2 = 48; allow shrink on narrow cards)
-  font-size: clamp(2rem, 11vw, var(--text-h2));
+  font-size: clamp(2rem, 11vw, var(--text-h2));   // responsive condensed display
   line-height: 1.05;
+
+  @include bp.desktop { font-size: var(--text-h2); }
 }
 
 .start__title-accent { color: var(--color-btn-cta-bg); } // magenta "XLH"
 
-.start__lead {
-  margin: var(--space-component-sm) 0 0;
-  color: var(--color-text);
-}
-
-.start__note {
-  margin: var(--space-micro-lg) 0 0;
-  color: var(--color-text);
-}
-
-.start__cta {
-  margin-top: var(--space-component-sm);
-}
-
-.start__disclaimer {
-  margin: var(--space-component-sm) 0 0;
-  color: var(--color-text);
-}
+.start__lead { margin: var(--space-component-sm) 0 0; color: var(--color-text); }
+.start__note { margin: var(--space-micro-lg) 0 0; color: var(--color-text); }
+.start__cta { margin-top: var(--space-component-sm); }
+.start__disclaimer { margin: var(--space-component-sm) 0 0; color: var(--color-text); }
 
 .start__consent {
-  margin: var(--space-component-sm) 0 0;
+  margin: var(--space-component-md) 0 0;
   color: var(--color-text);
   text-align: center;
 }

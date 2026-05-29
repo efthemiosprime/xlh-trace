@@ -1,0 +1,11 @@
+// Responsive breakpoints (Sass-only — @media conditions can't read CSS custom
+// properties, so these stay as Sass variables/mixins). specs/04-screens.md.
+//
+// Mobile-first: base styles target 360px; the desktop two-column composition
+// kicks in at $bp-desktop.
+
+$bp-desktop: 768px;   // mobile single-column → desktop two-column
+
+@mixin desktop {
+  @media (min-width: $bp-desktop) { @content; }
+}
