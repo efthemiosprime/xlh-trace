@@ -1,15 +1,12 @@
 import { generateId } from '../utils/id.js';
-import { RELATIONSHIP, GENERATION } from './constants.js';
+import { RELATIONSHIP, XLH_ANSWER } from './constants.js';
 
-const STORAGE_KEY = 'xlh-family-tree';
+const MAX_PEOPLE = 50; // DM-8
 
-class FamilyStore {
+// In-memory family store with pub/sub (DM-6..10). No persistence (DM-10/EMBED-2).
+export class FamilyStore {
   #people = new Map();
   #listeners = new Set();
-
-  constructor() {
-    this.#load();
-  }
 
   subscribe(listener) {
     this.#listeners.add(listener);
@@ -20,23 +17,35 @@ class FamilyStore {
     for (const listener of this.#listeners) {
       listener(event, data);
     }
-    this.#save();
   }
 
-  createPerson({ name, sex, xlhStatus, relationship, generation, parentIds = [], spouseId = null }) {
+  count() { return this.#people.size; }
+  canAddPerson() { return this.#people.size < MAX_PEOPLE; } // DM-8
+
+  createPerson(attrs = {}) {
+    if (!this.canAddPerson()) return null; // DM-8
+    const {
+      name = '', sex, answer = null, symptoms = [],
+      relationship, generation, parentIds = [], spouseId = null,
+    } = attrs;
     const person = {
       id: generateId(),
       name,
       sex,
-      xlhStatus,
-      computedStatus: null,
-      probability: null,
+      answer,
+      symptoms: answer === XLH_ANSWER.NO ? [] : [...symptoms], // DM-7
+      result: null,
+      chance: null,
       relationship,
       generation,
-      parentIds,
+      parentIds: [...parentIds],
       childIds: [],
       siblingIds: [],
       spouseId,
+      // legacy fields, kept until the old UI is retired in Phase 4:
+      xlhStatus: attrs.xlhStatus ?? null,
+      computedStatus: null,
+      probability: null,
       isSpontaneous: false,
     };
     this.#people.set(person.id, person);
@@ -45,6 +54,7 @@ class FamilyStore {
   }
 
   addPerson(person) {
+    if (!this.canAddPerson()) return null; // DM-8
     this.#people.set(person.id, person);
     this.#notify('add', person);
     return person;
@@ -54,6 +64,7 @@ class FamilyStore {
     const person = this.#people.get(id);
     if (!person) return null;
     Object.assign(person, updates);
+    if (person.answer === XLH_ANSWER.NO) person.symptoms = []; // DM-7
     this.#notify('update', person);
     return person;
   }
@@ -81,6 +92,18 @@ class FamilyStore {
   getProband() {
     for (const p of this.#people.values()) {
       if (p.relationship === RELATIONSHIP.PROBAND) return p;
+    }
+    return null;
+  }
+
+  getPartner() {
+    const proband = this.getProband();
+    if (proband?.spouseId) {
+      const spouse = this.#people.get(proband.spouseId);
+      if (spouse) return spouse;
+    }
+    for (const p of this.#people.values()) {
+      if (p.relationship === RELATIONSHIP.PARTNER || p.relationship === RELATIONSHIP.SPOUSE) return p;
     }
     return null;
   }
@@ -187,24 +210,7 @@ class FamilyStore {
     }
     this.#notify('load', null);
   }
-
-  #save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.toJSON()));
-    } catch (e) { /* ignore */ }
-  }
-
-  #load() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const data = JSON.parse(raw);
-        for (const person of data) {
-          this.#people.set(person.id, person);
-        }
-      }
-    } catch (e) { /* ignore */ }
-  }
 }
 
+// Shared singleton for app use. Tests construct their own `new FamilyStore()`.
 export const familyStore = new FamilyStore();

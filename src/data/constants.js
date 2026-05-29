@@ -27,12 +27,36 @@ export const XLH_RESULT = {
 
 export const RELATIONSHIP = {
   PROBAND: 'proband',
+  PARTNER: 'partner',
   CHILD: 'child',
+  SIBLING: 'sibling',
   PARENT: 'parent',
   AUNT_UNCLE: 'aunt_uncle',
   GRANDPARENT: 'grandparent',
-  SPOUSE: 'spouse',
+  COUSIN: 'cousin',
+  NIBLING: 'nibling',
+  SPOUSE: 'spouse', // legacy alias for PARTNER (old UI); retire in Phase 4
 };
+
+// DM-5 — symptom catalog (groups + items). Stored on a person as group ids.
+export const SYMPTOM_GROUPS = [
+  { id: 'growth', label: 'Changes in growth and development',
+    items: ['Shorter than average height', 'Weakening of growing bones (rickets)'] },
+  { id: 'bone', label: 'Bone weakness and broken bones',
+    items: ['Weakening of mature bone (osteomalacia)',
+            'Broken bones (fractures) / areas of weakened bone that are not completely broken (pseudofractures)'] },
+  { id: 'joint', label: 'Joint and tendon issues',
+    items: ['Joint damage (osteoarthritis)', 'Hardening of tissue attaching bones and muscles (enthesopathy)'] },
+  { id: 'walking', label: 'Leg and walking issues',
+    items: ['Delayed walking or an unusual way of walking (gait abnormalities)', 'Bowed legs and knock knees'] },
+  { id: 'pain', label: 'Pain, weakness, and fatigue',
+    items: ['Bone and joint pain', 'Muscle pain and weakness', 'Fatigue'] },
+  { id: 'head', label: 'Head and spine complications',
+    items: ['Unusual shape of the head (craniosynostosis)', 'Narrowing of spaces in the spine (spinal stenosis)'] },
+  { id: 'dental', label: 'Dental issues',
+    items: ['Abscesses and tooth loss', 'Problems with the gums, like redness, swelling, or infection (periodontitis)'] },
+  { id: 'hearing', label: 'Hearing issues', items: ['Hearing loss'] },
+];
 
 export const STEPS = [
   { id: 1, label: 'Who is this for?' },
