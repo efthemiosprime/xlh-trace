@@ -35,6 +35,7 @@ UI screens (pixel-faithful to Figma) are built against the green logic afterward
 | `FLOW-` | Wizard flow state machine | [03-wizard-flow.md](03-wizard-flow.md) |
 | `UI-`   | Screens & components (Figma) | [04-screens.md](04-screens.md) |
 | `PDF-`  | Downloadable PDF export | [05-pdf-export.md](05-pdf-export.md) |
+| `R-`    | Architecture & coding conventions | [06-architecture.md](06-architecture.md) |
 
 ## Status legend used throughout
 
