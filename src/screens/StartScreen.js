@@ -54,7 +54,7 @@ export function createStartScreen(mount, { onStart } = {}) {
       'medical advice or diagnosis, please consult a healthcare professional.'),
   ]);
 
-  const card = h('div', { className: 'app-shell start__card' }, [
+  const card = h('div', { className: 'app-shell' }, [
     h('div', { className: 'start__main' }, [visual, content]),
     h('p', { className: 'ds-footnote start__consent' }, CONSENT_TEXT),
   ]);
