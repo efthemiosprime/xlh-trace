@@ -20,7 +20,8 @@ $color: (
   'input-placeholder': #858b9b,
   'input-text': #343e59,
   'border-subtle': #858b9b,
-  'disabled': #c5c5c5,
+  'disabled': #c5c5c5,            // link/subnav disabled
+  'btn-disabled': #949494,        // button disabled fill (color/link/footer/disabled)
   'btn-cta-bg': #ad0b49,          // secondary token = solid magenta CTA
   'btn-cta-bg-hover': #960a3f,
   'btn-cta-text': #f6f6f6,

@@ -34,7 +34,7 @@
   }
 
   &:disabled, &[aria-disabled="true"] {
-    background: var(--color-disabled); border-color: var(--color-disabled);
+    background: var(--color-btn-disabled); border-color: var(--color-btn-disabled);
     color: #ffffff; cursor: not-allowed;
   }
 }
