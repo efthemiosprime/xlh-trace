@@ -77,6 +77,14 @@ single-column → two-column composition at **`$bp-desktop` = 768px** (Sass var/
 
 ## Component catalog & variants
 
+### DS-SHELL — global app container (`.page` + `.app-shell`)
+The **single container for the whole tool** — start screen, every wizard step, and the
+summary all render inside it. `.page` = steel field (page bg) with a relative margin that
+scales with the screen; `.app-shell` = centered snow card, **`max-width: 1200px`** (fills
+100% below that), large radius, internal padding. This is the generalization of the original
+`start__card`. Screens add their own internals inside `.app-shell` (e.g. the start two-column,
+or the wizard stepper + input-card + tree-preview). Defined in `src/styles/_components.scss`.
+
 ### DS-BUTTON — Button (instances, not a variant set)
 Three visual types (from TOKEN-1) × two sizes (`lg`/`md`, TOKEN-2) × states. Pill radius 32,
 padding from `--space-button-*`, label Extended Bold.

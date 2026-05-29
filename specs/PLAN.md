@@ -108,16 +108,22 @@ then store, then UI/visual, then PDF.
 - **🛑 Commit:** `feat(store): migrate family store to new data model (DM-1..9)`
 
 ### Phase 4 — Wizard UI (pixel-faithful, per screen)
-- **Spec:** [04-screens.md](04-screens.md) + [08-design-system.md](08-design-system.md).
-  First land the tokens: replace the old `src/style.css` palette with the Figma tokens
-  (`TOKEN-1..4`) as `:root` CSS custom properties; components consume only those vars.
-  Then pull each mobile `<instance>` via Figma `get_design_context` as each screen is built
-  to confirm geometry (`_(confirm at build)_` items in 08).
+- **Spec:** [04-screens.md](04-screens.md) + [08-design-system.md](08-design-system.md) +
+  **per-screen specs in [specs/screens/](screens/README.md)** (reviewed against *both* the
+  desktop and mobile Figma frames for every state).
+- **Tokens already landed:** `src/styles/` SCSS tokens + isolated component partials
+  (`components/_shell|button|card|typography.scss`) incl. the global **`DS-SHELL`**
+  (`.page` + `.app-shell`, max 1200) — the container shared by 0.0, every step, and summary.
 - **Tests:** `tests/ui/*.spec.js` (jsdom) for behavior: render, validation, gating,
-  landing/skip, overlays, disabled-Dad tooltip, limit popup.
-- **Build order:** App/ProgressBar shell → Step 1 (+symptoms +partner) → Step 2 → Step 3
-  (siblings) → Step 4 (parent + male variant) → Step 5 → Step 6 → wire `WizardFlow`.
-- **DoD:** full wizard walkthrough matches Figma + flow tests.
+  landing/skip, overlays, disabled-Dad tooltip, limit popup; Playwright for both layouts.
+- **Build order (shell-first):**
+  1. **Wizard shell + chrome** — `createWizardShell` (stepper + content slot + live tree
+     preview + nav), desktop two-column / mobile lime-bar + VIEW TREE
+     ([screens/00-wizard-shell.md](screens/00-wizard-shell.md)); reuses `DS-SHELL`.
+  2. **Step 1** ([screens/01-step-self.md](screens/01-step-self.md)) → Step 2 → Step 3 →
+     Step 4 (+ disabled-Dad) → Step 5 → Step 6 → wire to `WizardFlow` view-state.
+  3. Per screen: pull both Figma frames, confirm geometry, build to its screen spec.
+- **DoD:** full wizard walkthrough matches Figma (both layouts) + flow/UI tests green.
 - **🛑 Commit(s):** per logical group, e.g. `feat(wizard): build Step 1 self + symptoms
   (UI-1.x)`, `feat(wizard): add siblings step (UI-3.x)`, … (one commit per step/screen
   group; `style(wizard):` for pure Figma styling passes).
