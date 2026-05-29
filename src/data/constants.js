@@ -3,10 +3,26 @@ export const SEX = {
   FEMALE: 'female',
 };
 
+// Legacy status model (old engine/UI). Superseded by XLH_ANSWER + XLH_RESULT below;
+// kept until the old wizard/tree-builder UI is retired in Phase 4.
 export const XLH_STATUS = {
   AFFECTED: 'affected',
   UNAFFECTED: 'unaffected',
   UNKNOWN: 'unknown',
+};
+
+// New model (specs/01-domain-model.md). Raw user input:
+export const XLH_ANSWER = {
+  YES: 'yes',
+  NO: 'no',
+  UNSURE: 'unsure',
+};
+
+// Engine-computed result for display (specs/02-inheritance-logic.md, INH-*):
+export const XLH_RESULT = {
+  HAS: 'has_xlh',
+  MAY_HAVE: 'may_have_xlh',
+  NO: 'no_xlh',
 };
 
 export const RELATIONSHIP = {
