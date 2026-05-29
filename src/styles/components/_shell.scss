@@ -1,0 +1,22 @@
+// DS-SHELL — global app container.
+// Steel field (.page) + centered snow card (.app-shell, max 1200) that fills the
+// viewport. Shared by the start screen, every wizard step, and the summary.
+
+.page {
+  display: flex;
+  min-height: 100dvh;
+  padding: clamp(12px, 3.2vmin, 48px);   // steel field margin (scales with screen)
+  background: var(--color-brand-steel);
+}
+
+.app-shell {
+  flex: 1 1 auto;
+  width: 100%;
+  max-width: 1200px;                      // design content width; fills 100% below this
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(20px, 4vmin, 72px);
+  background: var(--color-brand-snow);
+  border-radius: clamp(16px, 2.4vmin, 32px);
+}

@@ -1,0 +1,13 @@
+// Typography utilities (TOKEN-2). Consume tokens via var().
+
+.ds-eyebrow {
+  font-family: var(--font-condensed); font-weight: 700;
+  font-size: var(--text-footnote); line-height: var(--lh-footnote);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text);
+}
+.ds-h2 { font-family: var(--font-condensed); font-weight: 700; font-size: var(--text-h2); line-height: var(--lh-h2); }
+.ds-h4 { font-family: var(--font-condensed); font-weight: 700; font-size: var(--text-h4); line-height: var(--lh-h4); }
+.ds-h5 { font-family: var(--font-condensed); font-weight: 700; font-size: var(--text-h5); line-height: var(--lh-h5); }
+.ds-subhead { font-weight: 500; font-size: var(--text-subhead); line-height: var(--lh-subhead); }
+.ds-body { font-size: var(--text-body-md); line-height: var(--lh-body-md); }
+.ds-footnote { font-size: var(--text-footnote); line-height: var(--lh-footnote); }

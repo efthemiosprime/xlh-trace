@@ -1,25 +1,6 @@
-// Start screen (Figma 0.0 / UI-0). The card fills the viewport with a relative
-// steel margin (capped at the 1440 design width), like Figma. Tokens for color/type.
+// Start screen (Figma 0.0 / UI-0). Container is the global .page + .app-shell
+// (DS-SHELL); this file styles only the Start-specific internals. Tokens for color/type.
 @use '../styles/breakpoints' as bp;
-
-.start {
-  display: flex;
-  min-height: 100dvh;
-  padding: clamp(12px, 3.2vmin, 48px);   // steel field margin (scales with screen)
-  background: var(--color-brand-steel);
-}
-
-.start__card {
-  flex: 1 1 auto;
-  width: 100%;
-  max-width: 1200px;                      // design content width; fills 100% below this
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  padding: clamp(20px, 4vmin, 72px);
-  background: var(--color-brand-snow);
-  border-radius: clamp(16px, 2.4vmin, 32px);
-}
 
 // mobile: top-anchored, left-aligned single column.
 // desktop: two centered columns (correct as-is).

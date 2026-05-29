@@ -1,5 +1,10 @@
 // XLH Family Tree — design-system entry.
-// Import this once at app bootstrap; components then use var(--token) + .ds-* classes.
+// Import once at app bootstrap; components then use var(--token) + .ds-*/.app-shell classes.
 @use 'tokens';
 @use 'base';
-@use 'components';
+
+// Isolated per-component partials (one concern per file, R4)
+@use 'components/typography';
+@use 'components/shell';
+@use 'components/button';
+@use 'components/card';
