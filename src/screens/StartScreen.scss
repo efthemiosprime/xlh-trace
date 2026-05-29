@@ -1,55 +1,57 @@
-// Start screen (Figma 0.0 / UI-0). Layout only — colors/sizes from tokens.
+// Start screen (Figma 0.0 / UI-0). The card fills the viewport with a relative
+// steel margin (capped at the 1440 design width), like Figma. Tokens for color/type.
 @use '../styles/breakpoints' as bp;
 
 .start {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100dvh;            // preview presentation; host controls height in-iframe
-  padding: var(--space-component-xs);
+  min-height: 100dvh;
+  padding: clamp(12px, 3.2vmin, 48px);   // steel field margin (scales with screen)
   background: var(--color-brand-steel);
-
-  @include bp.desktop { padding: var(--space-component-xl); }
 }
 
 .start__card {
+  flex: 1 1 auto;
   width: 100%;
-  max-width: 360px;
-  padding: var(--space-component-md) var(--space-component-sm);
-  // .ds-card supplies snow bg + lime border + card radius
-
-  @include bp.desktop {
-    max-width: 960px;
-    padding: var(--space-component-xl);
-  }
-}
-
-// main region: column on mobile, two-column on desktop
-.start__main {
+  max-width: 1440px;                      // design width; fills 100% below this
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
+  padding: clamp(20px, 4vmin, 72px);
+  background: var(--color-brand-snow);
+  border-radius: clamp(16px, 2.4vmin, 32px);
+}
+
+// main region fills the card and centers; consent sits beneath it
+.start__main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-component-md);
 
   @include bp.desktop {
     flex-direction: row;
-    align-items: center;
-    gap: var(--space-component-xl);
+    gap: clamp(32px, 5vw, 96px);
   }
 }
 
 .start__visual {
+  display: flex;
+  justify-content: center;
   @include bp.desktop { flex: 1 1 0; min-width: 0; }
 }
 
 .start__content {
+  width: 100%;
   @include bp.desktop { flex: 1 1 0; min-width: 0; }
 }
 
-// mobile family icon vs desktop sample tree — show one per breakpoint
+// mobile family icon vs desktop sample tree — one per breakpoint
 .start__icon {
-  width: 104px;
-  margin-bottom: var(--space-component-sm);
-  svg { width: 100%; height: auto; }
-
+  display: block;
+  width: clamp(112px, 38vw, 180px);
+  height: auto;
   @include bp.desktop { display: none; }
 }
 
@@ -57,9 +59,10 @@
   display: none;
   @include bp.desktop {
     display: block;
-    max-width: 320px;
+    width: auto;
+    max-width: 100%;
+    max-height: 64dvh;        // scales with viewport height, keeps aspect
     margin: 0 auto;
-    svg { width: 100%; height: auto; }
   }
 }
 
@@ -67,21 +70,20 @@
   margin: 0;
   text-transform: uppercase;
   color: var(--color-text);
-  font-size: clamp(2rem, 11vw, var(--text-h2));   // responsive condensed display
+  font-size: clamp(2rem, 8vw, 3.25rem);   // fluid display type
   line-height: 1.05;
-
-  @include bp.desktop { font-size: var(--text-h2); }
 }
 
 .start__title-accent { color: var(--color-btn-cta-bg); } // magenta "XLH"
 
 .start__lead { margin: var(--space-component-sm) 0 0; color: var(--color-text); }
 .start__note { margin: var(--space-micro-lg) 0 0; color: var(--color-text); }
-.start__cta { margin-top: var(--space-component-sm); }
+.start__cta { margin-top: var(--space-component-md); }
 .start__disclaimer { margin: var(--space-component-sm) 0 0; color: var(--color-text); }
 
 .start__consent {
-  margin: var(--space-component-md) 0 0;
+  margin: var(--space-component-md) auto 0;
+  max-width: 880px;
   color: var(--color-text);
   text-align: center;
 }

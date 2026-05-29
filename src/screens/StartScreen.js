@@ -1,50 +1,10 @@
 import { h } from '../utils/dom.js';
 import './StartScreen.scss';
 
-/* Decorative illustrations (DS-PERSONICON style). Static constants → safe to
-   inject. Placeholder approximations of the Figma brand art (export the real
-   SVGs for production — see DS-ASSET). Both are aria-hidden. */
-
-// Mobile (single-column): compact 2-adult / 2-child family group.
-const FAMILY_SVG = `
-<svg viewBox="0 0 104 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-  <g stroke="#343e59" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-    <circle cx="26" cy="13" r="9" fill="#f6f6f6"/>
-    <path d="M11 47c0-9 6.7-16 15-16s15 7 15 16v3H11z" fill="#f6f6f6"/>
-    <circle cx="62" cy="13" r="9" fill="#f6f6f6"/>
-    <path d="M47 47c0-9 6.7-16 15-16s15 7 15 16v3H47z" fill="#f6f6f6"/>
-    <circle cx="38" cy="34" r="7" fill="#c9e87c"/>
-    <path d="M26 64c0-7 5.4-13 12-13s12 6 12 13v4H26z" fill="#c9e87c"/>
-    <circle cx="68" cy="34" r="7" fill="#c9e87c"/>
-    <path d="M56 64c0-7 5.4-13 12-13s12 6 12 13v4H56z" fill="#c9e87c"/>
-  </g>
-</svg>`;
-
-// Desktop (two-column): a small sample inheritance pedigree.
-const LIME = '#c9e87c';
-const SNOW = '#f6f6f6';
-const person = (x, y, fill) =>
-  `<g transform="translate(${x} ${y})">
-     <circle cx="0" cy="9" r="9" fill="${fill}"/>
-     <path d="M-15 47c0-9 6.7-16 15-16s15 7 15 16v3H-15z" fill="${fill}"/>
-   </g>`;
-const SAMPLE_TREE_SVG = `
-<svg viewBox="0 0 300 250" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-  <g stroke="#343e59" stroke-width="2" fill="none" stroke-linecap="round">
-    <path d="M150 50 V70 M70 70 H230 M70 70 V90 M230 70 V90"/>
-    <path d="M70 140 V160 M40 160 H100 M40 160 V180 M100 160 V180"/>
-    <path d="M230 140 V160 M200 160 H260 M200 160 V180 M260 160 V180"/>
-  </g>
-  <g stroke="#343e59" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
-    ${person(150, 0, LIME)}
-    ${person(70, 90, LIME)}
-    ${person(230, 90, SNOW)}
-    ${person(40, 180, LIME)}
-    ${person(100, 180, SNOW)}
-    ${person(200, 180, SNOW)}
-    ${person(260, 180, LIME)}
-  </g>
-</svg>`;
+/* Brand illustrations exported from Figma (public/images). Decorative → alt="".
+   mobile = simple family icon; desktop = sample inheritance pedigree. */
+const ICON_MOBILE = '/images/family-tree-icon.svg';
+const TREE_DESKTOP = '/images/full-tree.svg';
 
 const CONSENT_TEXT =
   'By entering information into this tool, you consent to your responses being used to ' +
@@ -56,18 +16,18 @@ const CONSENT_TEXT =
 
 /**
  * Start screen (Figma 0.0 / UI-0). Responsive: single-column (mobile) →
- * two-column (≥768px). Factory → returns destroy() (R2).
+ * two-column (≥768px); the card fills the viewport (capped at the 1440 design
+ * width). Factory → returns destroy() (R2).
  * @param {HTMLElement} mount
  * @param {{ onStart?: () => void }} [opts]
  */
 export function createStartScreen(mount, { onStart } = {}) {
   const titleId = 'start-title';
 
-  const visual = h('div', { className: 'start__visual' });
-  // mobile illustration + desktop sample tree; CSS shows one per breakpoint
-  visual.innerHTML =
-    `<div class="start__icon">${FAMILY_SVG}</div>` +
-    `<div class="start__tree">${SAMPLE_TREE_SVG}</div>`;
+  const visual = h('div', { className: 'start__visual' }, [
+    h('img', { className: 'start__icon', src: ICON_MOBILE, alt: '' }),
+    h('img', { className: 'start__tree', src: TREE_DESKTOP, alt: '' }),
+  ]);
 
   const startBtn = h(
     'button',
@@ -94,7 +54,7 @@ export function createStartScreen(mount, { onStart } = {}) {
       'medical advice or diagnosis, please consult a healthcare professional.'),
   ]);
 
-  const card = h('div', { className: 'ds-card start__card' }, [
+  const card = h('div', { className: 'start__card' }, [
     h('div', { className: 'start__main' }, [visual, content]),
     h('p', { className: 'ds-footnote start__consent' }, CONSENT_TEXT),
   ]);
