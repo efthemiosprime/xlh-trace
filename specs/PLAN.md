@@ -210,6 +210,15 @@ the phase that needs it: `@testing-library/dom` + **Playwright** (Phase 4), `jsp
   blocked and the tool promises not to store data; reload restarts.
 - **No URL router** — the flow machine's view state (`FLOW-STATE`) tracks the current
   screen + overlay + a back stack; the renderer is `view = f(viewState)`.
+- **Two build templates** (from the full Figma review): Steps 2/3/5 = **Pattern A "list
+  step"**, Steps 4/6 = **Pattern B "chooser step"** ([screens/patterns.md](screens/patterns.md)).
+  Build the catalog components once, then compose — no bespoke per-step code.
+- **`component-catalog.md` is the component source of truth** — every `C-*` with its
+  variants/states/Figma node; a component is "done" only when it covers all of them + a11y.
+- **Disabled button fill = `#949494`** (`--color-btn-disabled`), corrected from `#c5c5c5`.
+- **Status display: categorical in UI, % in PDF** — the on-screen tree + profile popup show
+  No/May/Has XLH only; the percentage appears in the PDF table (`PDF-2`). `INH-11` keeps
+  `chance` in the model regardless.
 
 ## Open questions (non-blocking; default assumptions in specs)
 
@@ -223,6 +232,12 @@ the phase that needs it: `@testing-library/dom` + **Playwright** (Phase 4), `jsp
 4. **GT America font licensing** (`DS-ASSET`): need the licensed woff2 files to self-host in
    the iframe, or confirmation the asset is provided. Blocks pixel-faithful Phase 4; system
    fallback stack used until resolved.
+5. **Status display — categorical vs %** (design confirm): UI shows categorical only;
+   percentages only in the PDF. Confirm before building the summary/profile popup.
+6. **No standalone mobile summary frame** in Figma: mobile 7.1 layout is **inferred**
+   (stack intro → tree → actions). Confirm/obtain the mobile summary frame before Phase 5/4.
+7. **Figma label artifacts** (non-blocking): mobile "STEP 5 OF 6" frame mislabeled "STEP 1
+   OF 6" (`1521:49167`); "mobile 7.1" id is a desktop popup-open frame. Ignore in build.
 
 ## Optimizations backlog (explicitly later)
 
