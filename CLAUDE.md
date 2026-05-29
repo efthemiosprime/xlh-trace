@@ -56,6 +56,16 @@ The tool is **one page** embedded via `<iframe>` in XLHLink.com ([`specs/07-embe
   allowlist (never `'*'`). Avoid `100vh`/viewport-anchored layouts.
 - **Outbound links** target `_parent`/`_blank` + `rel="noopener"`; never trap the host.
 
+## Accessibility (first-class — [`specs/09-accessibility.md`](specs/09-accessibility.md))
+
+**WCAG 2.2 AA is part of definition-of-done, not a later pass.** Every UI chunk: semantic
+elements (`<button>`/`<label>`/`<fieldset>`+`<legend>`), keyboard-operable with visible focus,
+labels + `aria-required` on fields, `role="dialog"`+focus-trap+`Esc`+focus-restore on
+overlays, `aria-live` for step/result changes (single page = no route announce), **status by
+fill + text label, never color alone**, contrast ≥4.5:1 (≥3:1 large/UI; never lime text on
+white), reflow at 320px/200%, targets ≥24px, decorative icons `aria-hidden`. The pedigree SVG
+needs an accessible alternative. Verify with keyboard + `axe` (Playwright) before "done".
+
 ## Health-data note (PII/PHI)
 
 This tool states user data "will not be stored, shared, or used for marketing." Never

@@ -38,6 +38,7 @@ UI screens (pixel-faithful to Figma) are built against the green logic afterward
 | `R-`    | Architecture & coding conventions | [06-architecture.md](06-architecture.md) |
 | `EMBED-`| iframe embedding (single page, in XLHLink.com) | [07-embedding.md](07-embedding.md) |
 | `TOKEN-`/`DS-` | Design tokens & component variants (Figma) | [08-design-system.md](08-design-system.md) |
+| `A11Y-` | Accessibility (WCAG 2.2 AA) | [09-accessibility.md](09-accessibility.md) |
 
 ## Status legend used throughout
 
