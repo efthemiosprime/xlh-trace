@@ -6,15 +6,15 @@ frames for every state. Each cites requirement IDs from the top-level specs (`DM
 
 | Doc | Covers | Status |
 |-----|--------|--------|
-| [00-wizard-shell.md](00-wizard-shell.md) | Shared chrome (global `DS-SHELL` + stepper + tree preview + nav), desktop two-column / mobile lime-bar | reviewed |
-| [01-step-self.md](01-step-self.md) | Step 1 — Tell us about yourself (1.1–1.6), all states both layouts | reviewed |
-| `02-step-children.md` | Step 2 — Add children (landing/skip, input, review) | todo |
-| `03-step-siblings.md` | Step 3 — Add siblings (+ their children overlay) | todo |
-| `04-step-parent.md` | Step 4 — Pick a parent (Mom/Dad/Neither/IDK, disabled-Dad) | todo |
-| `05-step-aunts-uncles.md` | Step 5 — Aunts & uncles (+ their children) | todo |
-| `06-step-grandparents.md` | Step 6 — Grandparents (maternal/paternal) | todo |
-| `07-summary.md` | Final tree + profile popup + download/share/reset | todo |
-| (0.0 start) | Built — see `src/screens/StartScreen.*` | done |
+| [00-wizard-shell.md](00-wizard-shell.md) | Shared chrome (global `DS-SHELL` + stepper + tree preview + nav), desktop two-column / mobile lime-bar | ✅ reviewed |
+| [01-step-self.md](01-step-self.md) | Step 1 — Tell us about yourself (1.1–1.6), all states both layouts | ✅ reviewed |
+| **[patterns.md](patterns.md)** | **Pattern A "list step"** (Steps 2,3,5) + **Pattern B "chooser step"** (Steps 4,6) — both fully reviewed desktop+mobile, with per-step params + node IDs | ✅ reviewed |
+| [07-summary.md](07-summary.md) | Step 7 — final tree + profile popup + download/share/reset/email | ✅ reviewed |
+| (0.0 start) | Built — see `src/screens/StartScreen.*` | ✅ done |
+
+Steps 2–6 are not separate docs — they are instances of the two templates in
+[patterns.md](patterns.md). Components are catalogued in
+[../component-catalog.md](../component-catalog.md).
 
 ## Review template (per screen)
 For each screen capture: **states** (every Figma sub-frame), **components** (DS refs),

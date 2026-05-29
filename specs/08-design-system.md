@@ -77,6 +77,11 @@ single-column → two-column composition at **`$bp-desktop` = 768px** (Sass var/
 
 ## Component catalog & variants
 
+> **The authoritative component inventory (every component × variants × states × Figma node)
+> is [component-catalog.md](component-catalog.md).** The entries below capture tokens, exact
+> colors, and verified geometry; the catalog is the canonical variant/state matrix. Note:
+> button **disabled fill is `#949494`** (`--color-btn-disabled`), not `#c5c5c5`.
+
 ### DS-SHELL — global app container (`.page` + `.app-shell`)
 The **single container for the whole tool** — start screen, every wizard step, and the
 summary all render inside it. `.page` = steel field (page bg) with a relative margin that
