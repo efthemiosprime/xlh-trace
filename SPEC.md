@@ -1,3 +1,7 @@
+> ⚠️ **Superseded.** This document describes the original implementation. The authoritative
+> specification is now in [`specs/`](specs/README.md) (derived from the Figma design + the
+> `26-CRYSVT-0261_FamilyOutreachToolLogicDeck.pdf`). Kept for historical reference only.
+
 # XLH Family Tree Inheritance Tracker — Spec & Plan
 
 ## Context
