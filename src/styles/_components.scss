@@ -1,0 +1,63 @@
+// ============================================================
+// Shared component styles (DS-*). Consume tokens via var().
+// ============================================================
+
+// ---- Typography utilities (TOKEN-2) ----
+.ds-eyebrow {
+  font-family: var(--font-condensed); font-weight: 700;
+  font-size: var(--text-footnote); line-height: var(--lh-footnote);
+  letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text);
+}
+.ds-h2 { font-family: var(--font-condensed); font-weight: 700; font-size: var(--text-h2); line-height: var(--lh-h2); }
+.ds-h4 { font-family: var(--font-condensed); font-weight: 700; font-size: var(--text-h4); line-height: var(--lh-h4); }
+.ds-h5 { font-family: var(--font-condensed); font-weight: 700; font-size: var(--text-h5); line-height: var(--lh-h5); }
+.ds-subhead { font-weight: 500; font-size: var(--text-subhead); line-height: var(--lh-subhead); }
+.ds-body { font-size: var(--text-body-md); line-height: var(--lh-body-md); }
+.ds-footnote { font-size: var(--text-footnote); line-height: var(--lh-footnote); }
+
+// ---- DS-BUTTON (three styles × sizes × states) ----
+.ds-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-micro-md);
+  min-height: 48px; padding: var(--space-button-md) var(--space-component-md);
+  border-radius: var(--radius-button); border: 2px solid transparent;
+  font-family: var(--font-primary); font-weight: 700;
+  font-size: var(--text-btn-lg); line-height: 1; letter-spacing: 0.04em;
+  text-transform: uppercase; cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+
+  &--md { min-height: 40px; font-size: var(--text-btn-md); }
+  &--block { width: 100%; }
+
+  // solid magenta CTA (secondary token)
+  &--cta {
+    background: var(--color-btn-cta-bg); color: var(--color-btn-cta-text);
+    &:hover { background: var(--color-btn-cta-bg-hover); }
+  }
+
+  // steel-outline neutral (primary token) — neither / idk / + add / start over
+  &--steel {
+    background: var(--color-btn-steel-bg); color: var(--color-btn-steel-line);
+    border-color: var(--color-btn-steel-line);
+    &:hover { background: var(--color-btn-steel-bg-hover); }
+  }
+
+  // magenta-outline (tertiary token) — go back / close
+  &--magenta {
+    background: #ffffff; color: var(--color-btn-magenta-line);
+    border-color: var(--color-btn-magenta-line);
+    &:hover { background: var(--color-btn-magenta-bg-hover); }
+  }
+
+  &:disabled, &[aria-disabled="true"] {
+    background: var(--color-disabled); border-color: var(--color-disabled);
+    color: #ffffff; cursor: not-allowed;
+  }
+}
+
+// ---- DS-INPUTCARD (shared card surface) ----
+.ds-card {
+  background: var(--color-brand-snow);
+  border: 1px solid var(--color-brand-lime);
+  border-radius: var(--radius-card);
+}

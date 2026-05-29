@@ -1,0 +1,41 @@
+// ============================================================
+// Base reset + accessibility base (consumes tokens via var()).
+// ============================================================
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-primary);
+  font-size: var(--text-body-md);
+  line-height: var(--lh-body-md);
+  color: var(--color-text);
+  background: var(--color-bg-page);
+}
+
+img, svg { max-width: 100%; display: block; }
+button { font: inherit; color: inherit; }
+
+// A11Y-2 — visible focus everywhere (never removed without replacement)
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+// A11Y-8 — respect reduced motion
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+// Screen-reader-only utility (A11Y-10 accessible alternatives)
+.sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

@@ -1,0 +1,87 @@
+// ============================================================
+// Design tokens — SCSS source of truth (specs/08-design-system.md)
+// Authored as SCSS maps, emitted as :root CSS custom properties so
+// components consume them via var() (themeable; per CLAUDE.md R3/R4).
+// Also @forward-ed as Sass maps for any build-time needs.
+// ============================================================
+@use 'sass:list';
+
+// ---- TOKEN-1 — Color ----
+$color: (
+  'brand-steel': #343e59,
+  'brand-lime': #c9e87c,
+  'brand-snow': #f6f6f6,
+  'brand-teal': #a1f0ed,
+  'bg-page': #ffffff,
+  'text': #343e59,            // on-page / on-surface primary
+  'text-inverse': #f6f6f6,
+  'input-border': #5d657a,
+  'input-border-focus': #343e59,
+  'input-placeholder': #858b9b,
+  'input-text': #343e59,
+  'border-subtle': #858b9b,
+  'disabled': #c5c5c5,
+  'btn-cta-bg': #ad0b49,          // secondary token = solid magenta CTA
+  'btn-cta-bg-hover': #960a3f,
+  'btn-cta-text': #f6f6f6,
+  'btn-steel-bg': #f6f6f6,        // primary token = steel-outline neutral
+  'btn-steel-bg-hover': #d6d8de,
+  'btn-steel-line': #343e59,
+  'btn-magenta-line': #ad0b49,    // tertiary token = magenta-outline
+  'btn-magenta-bg-hover': #fbe8f0,
+);
+
+// ---- TOKEN-3 — Spacing ----
+$space: (
+  'micro-xs': 2px, 'micro-sm': 4px, 'micro-md': 8px, 'micro-lg': 12px,
+  'component-xs': 16px, 'component-sm': 24px, 'component-md': 32px,
+  'component-lg': 40px, 'component-xl': 48px,
+  'button-xs': 4px, 'button-sm': 8px, 'button-md': 12px,
+  'button-lg': 16px, 'button-xl': 20px,
+  'section-xs': 48px, 'section-sm': 64px, 'section-lg': 96px, 'section-xl': 120px,
+);
+
+// ---- TOKEN-4 — Radius ----
+$radius: (
+  'form': 8px,
+  'menu': 12px,
+  'button': 32px,
+  'card': 28px,   // start/landing cards read larger than menu radius
+);
+
+// ---- TOKEN-2 — Typography (size / line-height pairs) ----
+$type: (
+  'h2':       (48px, 52px),
+  'h4':       (32px, 40px),
+  'h5':       (24px, 32px),
+  'subhead':  (24px, 32px),
+  'eyebrow':  (20px, 24px),
+  'body-lg':  (20px, 28px),
+  'body-md':  (16px, 22px),
+  'body-sm':  (14px, 18px),
+  'footnote': (12px, 14px),
+  'btn-lg':   (16px, 16px),
+  'btn-md':   (14px, 14px),
+);
+
+// GT America is licensed (DS-ASSET) — fall back until the woff2 is delivered.
+$font-primary: ("GT America", "Helvetica Neue", Arial, system-ui, sans-serif);
+$font-condensed: ("GT America Condensed", "GT America", "Roboto Condensed",
+  "Arial Narrow", "Helvetica Neue", Arial, sans-serif);
+
+// ---- Emit as CSS custom properties ----
+:root {
+  @each $name, $value in $color   { --color-#{$name}: #{$value}; }
+  @each $name, $value in $space   { --space-#{$name}: #{$value}; }
+  @each $name, $value in $radius  { --radius-#{$name}: #{$value}; }
+
+  @each $name, $pair in $type {
+    --text-#{$name}: #{list.nth($pair, 1)};
+    --lh-#{$name}: #{list.nth($pair, 2)};
+  }
+
+  --font-primary: #{$font-primary};
+  --font-condensed: #{$font-condensed};
+
+  --focus-ring: #343e59; // A11Y-2 (≥3:1 on snow and magenta)
+}
