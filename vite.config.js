@@ -10,4 +10,9 @@ export default defineConfig({
       },
     },
   },
+  test: {
+    environment: 'node',
+    include: ['tests/**/*.spec.js'],
+    environmentMatchGlobs: [['tests/ui/**', 'jsdom']],
+  },
 });
