@@ -108,8 +108,11 @@ then store, then UI/visual, then PDF.
 - **🛑 Commit:** `feat(store): migrate family store to new data model (DM-1..9)`
 
 ### Phase 4 — Wizard UI (pixel-faithful, per screen)
-- **Spec:** [04-screens.md](04-screens.md). Pull each mobile `<instance>` via Figma
-  `get_design_context` as each screen is built.
+- **Spec:** [04-screens.md](04-screens.md) + [08-design-system.md](08-design-system.md).
+  First land the tokens: replace the old `src/style.css` palette with the Figma tokens
+  (`TOKEN-1..4`) as `:root` CSS custom properties; components consume only those vars.
+  Then pull each mobile `<instance>` via Figma `get_design_context` as each screen is built
+  to confirm geometry (`_(confirm at build)_` items in 08).
 - **Tests:** `tests/ui/*.spec.js` (jsdom) for behavior: render, validation, gating,
   landing/skip, overlays, disabled-Dad tooltip, limit popup.
 - **Build order:** App/ProgressBar shell → Step 1 (+symptoms +partner) → Step 2 → Step 3
@@ -207,6 +210,9 @@ the phase that needs it: `@testing-library/dom` + **Playwright** (Phase 4), `jsp
    spec INH-6 stops quantifying past a `MAY_HAVE` parent. Confirm that's intended.
 3. **Niblings/cousins percentages:** only direct offspring of a `HAS_XLH` parent get a %;
    confirm aunts'/uncles' children should otherwise show qualitative "May have XLH".
+4. **GT America font licensing** (`DS-ASSET`): need the licensed woff2 files to self-host in
+   the iframe, or confirmation the asset is provided. Blocks pixel-faithful Phase 4; system
+   fallback stack used until resolved.
 
 ## Optimizations backlog (explicitly later)
 
