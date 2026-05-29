@@ -1,8 +1,14 @@
 # 04 — Screens & Components (Figma)
 
-Source: Figma `b4bf3fgE9z0ow9hlAXzVuy`, canvas `204:979`. Target: **mobile 360px**,
-card-based. Pixel-faithful is the goal; build after logic is green. For each screen fetch
-the **mobile `<instance>`** id (not the symbol) via `get_design_context`.
+Source: Figma `b4bf3fgE9z0ow9hlAXzVuy`, canvas `204:979`. **Responsive, both layouts**,
+card-based. Pixel-faithful is the goal; build after logic is green.
+
+> **Responsive strategy.** Mobile-first. Figma defines two compositions: **mobile** (360px
+> `<instance>`, single-column) and **desktop** (1440 `<symbol>`, **two-column**). They are
+> not the same layout scaled — e.g. 0.0 desktop is sample-tree-left + text-right; wizard
+> steps are input-card + live-tree-preview side-by-side. The single-column → two-column
+> switch is at **`$bp-desktop` = 768px** (`src/styles/_breakpoints.scss`). Fetch **both** the
+> mobile instance and the desktop symbol per screen when building.
 
 > **Single page, no router.** Every `UI-*` screen below is a *view state*, not a URL — the
 > whole flow lives in one embedded page (`EMBED-1`). The current screen + open overlay are

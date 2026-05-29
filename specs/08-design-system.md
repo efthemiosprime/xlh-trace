@@ -66,7 +66,12 @@ Condensed Bold, Extended Bold. ⚠️ GT America is a **licensed font** — see 
 ## TOKEN-4 — Radius
 
 `--radius-form 8` (inputs) · `--radius-menu 12` (dropdowns/cards) · `--radius-button 32`
-(pill) · `--radius-cta 32`. Breakpoint standard `1440` (desktop); app target is mobile 360.
+(pill) · `--radius-cta 32`.
+
+## TOKEN-5 — Breakpoint
+Figma design widths: mobile **360**, desktop **1440**. Implementation switches the
+single-column → two-column composition at **`$bp-desktop` = 768px** (Sass var/mixin in
+`src/styles/_breakpoints.scss`; media queries can't read CSS custom properties). Mobile-first.
 
 ---
 
