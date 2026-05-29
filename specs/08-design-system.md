@@ -76,17 +76,30 @@ Condensed Bold, Extended Bold. ⚠️ GT America is a **licensed font** — see 
 Three visual types (from TOKEN-1) × two sizes (`lg`/`md`, TOKEN-2) × states. Pill radius 32,
 padding from `--space-button-*`, label Extended Bold.
 
-| Type | Fill | Border | Label | Used by (instances) |
-|------|------|--------|-------|---------------------|
-| **Solid CTA** (secondary token) | magenta `#ad0b49` | none | snow `#f6f6f6` | `button-next`, `button-yes`, `button-mom`, `button-dad`, `button-pdf`, `button-email` |
-| **Outline** (tertiary token) | white | magenta `#ad0b49` | magenta | `button-back`, `button-skip`, `button-neither`, `button-idk`, `CLOSE`, `START OVER` |
-| **Ghost / add** (primary token) | snow `#f6f6f6` | steel `#343e59` | steel | `+ Add spouse/partner`, `+ Add their children`, `+ Add sibling`, `tool add edit button` |
+There are **three** distinct visual styles (verified by screenshot — note the two outline
+styles differ by border color):
 
-States (apply per type): **default**, **hover** (ghost → `#d6d8de`; solid/outline darken),
-**pressed**, **disabled** (gray `#c5c5c5` fill/label — e.g. **Dad** for a male proband,
-`FLOW-5a`, with the "can only get XLH from their mom" tooltip), **focus** (visible ring —
-a11y). **Selected** (mom/dad chooser): selected = solid CTA, unselected = outline.
-_(exact px height/padding: confirm at build)_
+| Style | Fill | Border | Label | Used by (instances) |
+|-------|------|--------|-------|---------------------|
+| **Solid CTA** (secondary token) | magenta `#ad0b49` | none | snow `#f6f6f6` | `button-next`, `button-yes`, `button-mom`, `button-dad`, `button-grandmother`, `button-grandfather`, `button-pdf`, `button-email` |
+| **Magenta outline** (tertiary token) | white | magenta `#ad0b49` | magenta | `button-back` (GO BACK), `CLOSE` (pop-ups) |
+| **Steel outline** (primary token) | snow `#f6f6f6` | steel `#343e59` | steel | `button-neither`, `button-idk`, `START OVER`, `+ Add spouse/partner`, `+ Add their children`, `+ Add sibling`, `tool add edit button` |
+
+> `button-skip` color is _confirm-at-build_ (landing screens) — likely magenta-outline.
+> **Correction:** an earlier draft put neither/idk on the magenta-outline style; the
+> screenshot shows them **steel** outline (the `primary` token). Map by token value, not name
+> — `primary` token = the light steel-outline neutral button; `secondary` = the magenta CTA.
+
+**Geometry (verified):** pill radius 32. Stacked choosers/landing buttons **48px** tall,
+full-card width (227–308px). Bottom nav pair (`button-back` + `button-next`) **56px** tall,
+**152px** wide each, **16px** gap, side-by-side spanning the 320px card width. Stacked
+result buttons (pdf/email/start-over) **48px**, full width, **16px** vertical gaps.
+
+States (apply per style): **default**, **hover** (steel-outline → bg `#d6d8de`; solid/
+magenta-outline darken), **pressed**, **disabled** (gray `#c5c5c5` fill/label — e.g. **Dad**
+for a male proband, `FLOW-5a`, with the "can only get XLH from their mom" tooltip),
+**focus** (visible ring — a11y). **Selected** (mom/dad/grandparent chooser): selected =
+solid CTA, unselected = its outline style.
 
 ### DS-ADDEDIT — `tool add edit button` (real variant set)
 `Property 1 = Default | hover` (`1659:38304/38303`). The small inline + / edit affordance on
@@ -143,6 +156,59 @@ Legend rows: **No XLH** / **Has XLH** / **May have XLH** with ellipse swatches; 
 chromosome-with/without-XLH key. Appears in summary + PDF footer.
 
 ---
+
+---
+
+## Verified geometry & visuals (deep-extract — Phase-4 ready)
+
+Pulled from Figma metadata geometry + component screenshots (Code Connect declined — no code
+components to map yet). These are confirmed, not _(confirm at build)_.
+
+### Input Card (the white step card)
+White surface, **lime `#c9e87c` ~1px border**, rounded; mobile content width **288** inside
+**16px** padding (card ~320 wide). Top→bottom: **eyebrow** (e.g. "STEP 1 - TELL US ABOUT
+YOURSELF", uppercase steel, `--text-footnote`/eyebrow), **title** ("Provide your details",
+`--text-h5` condensed bold steel), **"*Required field"** footnote, then fields. A thin
+**lime divider** separates repeated person blocks. Breadcrumb dots (7×7 ellipses, 15px
+pitch) bottom-center indicate sub-screens.
+
+### Field label + input (DS-INPUT)
+Label is `--text-body-sm` **bold** steel, with a right-aligned collapse **`—`/`+`** toggle
+for repeatable sections. Input: full width, **~48px** tall, radius `--radius-form 8`, 1px
+`--color-input-border #5d657a`, placeholder `--color-input-placeholder #858b9b`
+("Enter name"), focus border `--color-input-border-focus #343e59`.
+
+### Radios (DS-RADIO)
+Row height **24px**; circle (steel stroke, filled steel dot when selected) + label
+`--text-body-sm`. Options laid out horizontally, ~**12px** gap. Groups: Gender (Male/Female,
+~173px), XLH (Yes/No/Unsure, ~232px). Two side-by-side label groups per row
+("Gender assigned at birth*" | "Do you have XLH?*").
+
+### Steps — mobile (DS-STEPS, `1239:43571`)
+**328×50** lime `#c9e87c` bar: left "**STEP _n_ OF 6**" (steel, bold caps), center
+"**VIEW TREE**" steel-outline pill toggle (switches to tree preview), right "**EXIT** ↦"
+steel link. (Desktop uses the full 7-dot labeled stepper, `UI-PROG`.)
+
+### Person icons (DS-PERSONICON)
+Humanoid silhouette, steel `#343e59` stroke; **gender by body shape** (female = skirt/dress,
+male = legs). **Status by fill:** No XLH = outline only; May have XLH = **half** lime; Has
+XLH = **full** lime body. The head is a status circle matching the legend swatch.
+
+### Chromosome chips (DS-CHROMO)
+Small circular chips labelled **X** / **Y**; the XLH-bearing chromosome is **lime-filled**,
+others steel-outline. Male shows `X`(lime) `Y`(steel) when affected — only the single X
+highlights. Shown next to the name in the profile pop-up.
+
+### Legend (DS-LEGEND)
+Circle swatches: **○ No XLH** (outline) · **◐ May have XLH** (half lime) · **● Has XLH**
+(full lime). Plus chromosome key (● = chromosome with XLH / ○ = without). Appears under the
+tree and in the PDF footer.
+
+### Profile pop-up (DS-POPUP, summary variant)
+Dark **steel `#343e59`** rounded card over a scrim. **Name in lime** (`--text-h5`),
+relationship + computed status in white caps ("COUSIN / MAY HAVE XLH"), **"Symptoms:"** bold
++ bulleted list (`--text-body-sm`), then the chromosome legend. Close **✕** top-right (snow).
+Tree connectors: steel, thin, elbow parent→child with a horizontal sibling bar.
 
 ## DS-ASSET — Font licensing (open item)
 **GT America** is a commercial typeface (Grilli Type). We need either the licensed web-font
